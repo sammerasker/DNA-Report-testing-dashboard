@@ -1,0 +1,276 @@
+.reportOutputPanel {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.headerActions {
+  display: flex;
+  gap: 10px;
+}
+
+.actionButton {
+  padding: 8px 14px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.actionButton:hover {
+  background-color: #e0e0e0;
+  border-color: #999;
+}
+
+.emptyMessage {
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.emptyMessage p {
+  margin: 10px 0;
+  font-size: 0.95rem;
+}
+
+.emptyMessage p:first-child {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.metricsSection {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.metricsTitle {
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.overallScore {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #fff;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  border: 2px solid #e0e0e0;
+}
+
+.scoreLabel {
+  font-weight: 600;
+  color: #555;
+  font-size: 1rem;
+}
+
+.scoreValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.scoreHigh {
+  color: #2e7d32;
+  background-color: #e8f5e9;
+}
+
+.scoreMedium {
+  color: #f57c00;
+  background-color: #fff3e0;
+}
+
+.scoreLow {
+  color: #c62828;
+  background-color: #ffebee;
+}
+
+.metricsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metricItem {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #fff;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.metricLabel {
+  font-weight: 500;
+  color: #555;
+  font-size: 0.9rem;
+  min-width: 180px;
+}
+
+.metricValue {
+  flex: 1;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.metricStatus {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-left: 10px;
+}
+
+.metricStatus.pass {
+  color: #4caf50;
+}
+
+.metricStatus.fail {
+  color: #f44336;
+}
+
+.reportContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  line-height: 1.6;
+}
+
+.reportContent h1 {
+  font-size: 2rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.reportContent h2 {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #444;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+.reportContent h3 {
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #555;
+}
+
+.reportContent p {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.reportContent ul,
+.reportContent ol {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+  color: #222;
+}
+
+.reportContent li {
+  margin-bottom: 0.5rem;
+  color: #222;
+}
+
+.reportContent li::marker {
+  color: #222;
+}
+
+.reportContent strong {
+  font-weight: 600;
+  color: #222;
+}
+
+.reportContent em {
+  font-style: italic;
+}
+
+.reportContent code {
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  font-size: 0.9em;
+}
+
+/* Comparison Mode Styles */
+.comparisonContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  height: calc(100% - 60px);
+}
+
+.comparisonColumn {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.columnHeader {
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.columnHeader h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.columnActions {
+  display: flex;
+  gap: 8px;
+}
+
+.comparisonColumn .metricsSection {
+  margin: 15px;
+  margin-bottom: 0;
+}
+
+.comparisonColumn .reportContent {
+  flex: 1;
+  margin: 15px;
+  overflow-y: auto;
+}

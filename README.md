@@ -1,40 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# DNA Report Generator
 
-## Getting Started
+A Next.js application that generates personalized entrepreneurial DNA reports from assessment data using AI. The system transforms raw assessment scores into comprehensive, human-readable reports through parallel chunk generation.
 
-First, run the development server:
+## Features
 
+- **Parallel Chunk Generation**: Generates 6 report sections simultaneously for faster processing
+- **Multiple AI Providers**: Supports OpenRouter and Hugging Face APIs
+- **Data Enrichment**: Transforms raw scores into meaningful interpretations
+- **Quality Validation**: Automated metrics ensure report completeness
+- **Interactive Test Interface**: Real-time report generation with debug information
+
+## Quick Start
+
+1. **Install dependencies**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Configure API keys**
+```bash
+cp .env.example .env.local
+# Edit .env.local and add your API keys
+```
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+3. **Run development server**
+```bash
+npm run dev
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+4. **Access the app**
+- Main page: http://localhost:3000
+- Test interface: http://localhost:3000/test-dna-report
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+## File Structure & Responsibilities
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Core Pipeline (`/lib/dna-report-chunked/`)
 
-## Learn More
+| File | Purpose |
+|------|---------|
+| `enrichment.js` | Transforms raw scores into human-readable context with interpretations |
+| `chunk-definitions.js` | Defines the 6 report sections (intro, traits, roles, etc.) |
+| `chunk-executor.js` | Executes chunks in parallel and manages API calls |
+| `report-assembler.js` | Combines chunks into final formatted report |
+| `api-provider.js` | Handles API communication with OpenRouter/Hugging Face |
+| `quality-metrics.js` | Validates report completeness and quality |
+| `trait-definitions.js` | Contains trait interpretations and scoring bands |
+| `trait-helpers.js` | Helper functions for trait processing |
+| `utils.js` | Utility functions for text processing |
+| `constants.js` | Configuration constants |
+| `monolithic-generator.js` | Alternative single-call generation (for comparison) |
 
-To learn more about Next.js, take a look at the following resources:
+### UI Components (`/components/dna-report-test/`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+| Component | Purpose |
+|-----------|---------|
+| `ControlPanel.js` | Provider/model selection and generation controls |
+| `RawDataPanel.js` | Displays and edits raw assessment JSON input |
+| `EnrichedDataPanel.js` | Shows enriched context sent to AI |
+| `ReportOutputPanel.js` | Displays final generated report |
+| `DebugPanel.js` | Shows execution details for each chunk |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Pages (`/pages/`)
 
-## Deploy on Vercel
+| Page | Purpose |
+|------|---------|
+| `index.js` | Landing page |
+| `test-dna-report.js` | Main test interface for report generation |
+| `_app.js` | Next.js app wrapper |
+| `_document.js` | HTML document structure |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## How It Works
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+1. **Input**: Raw assessment data (JSON with scores, profile, roles)
+2. **Enrichment**: `enrichment.js` transforms scores into interpretations
+3. **Chunking**: `chunk-definitions.js` splits report into 6 sections
+4. **Execution**: `chunk-executor.js` generates all chunks in parallel via AI
+5. **Assembly**: `report-assembler.js` combines chunks into final report
+6. **Validation**: `quality-metrics.js` checks completeness
+
+## Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm test -- --coverage
+```
+
+## Environment Variables
+
+Required in `.env.local`:
+- `NEXT_PUBLIC_OPENROUTER_API_KEY` - OpenRouter API key
+- `NEXT_PUBLIC_HUGGINGFACE_API_KEY` - Hugging Face API key
+
+See `.env.example` for template.
+
+## Security
+
+⚠️ Never commit `.env.local` - it contains sensitive API keys and is already in `.gitignore`

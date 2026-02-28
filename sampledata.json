@@ -1,0 +1,38 @@
+{
+  "fullName": "Marion Anderson",
+  "firstName": "Marion",
+  "userTypes": ["entrepreneur-with-idea", "startup"],
+  "summary": "High-tempo visionary with a results-oriented leadership signature.",
+  "normalizedScores": {
+    "speed": 85,
+    "abstraction": 72,
+    "creativity": 90,
+    "structure": 45,
+    "planning": 50,
+    "risk": 78,
+    "empathy": 65,
+    "influence": 82,
+    "mission": 88,
+    "ambiguity": 82
+  },
+  "rolesTop": [
+    { "role": "Product-Led Founder", "score": 94 },
+    { "role": "Visionary CEO", "score": 88 }
+  ],
+  "traitInsights": {
+    "byTrait": {
+      "speed": {
+        "strengths": ["Rapid decision making"],
+        "suggestions": ["Ensure quality controls"]
+      },
+      "creativity": {
+        "strengths": ["Novel ideation"],
+        "suggestions": ["Tie ideas to KPIs"]
+      }
+    }
+  },
+  "domains": [
+    { "title": "Cognitive & Vision", "traits": ["speed", "abstraction", "creativity"] }
+  ],
+  "completedAt": "2026-02-25T16:44:15Z"
+}

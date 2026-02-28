@@ -1,0 +1,265 @@
+.debugPanel {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.expandButton {
+  padding: 8px 14px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.expandButton:hover {
+  background-color: #e0e0e0;
+  border-color: #999;
+}
+
+.emptyMessage {
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.emptyMessage p {
+  margin: 10px 0;
+  font-size: 0.95rem;
+}
+
+.emptyMessage p:first-child {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.chunksContainer {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chunkSection {
+  margin-bottom: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.chunkHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background-color: #f5f5f5;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.chunkHeader:hover {
+  background-color: #e8e8e8;
+}
+
+.chunkHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.expandIcon {
+  font-size: 0.8rem;
+  color: #666;
+  width: 12px;
+}
+
+.chunkTitle {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.statusBadge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.chunkHeaderRight {
+  display: flex;
+  gap: 20px;
+}
+
+.stat {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.chunkDetails {
+  padding: 20px;
+  background-color: #fafafa;
+  border-top: 1px solid #e0e0e0;
+}
+
+.detailSection {
+  margin-bottom: 20px;
+}
+
+.detailSection:last-child {
+  margin-bottom: 0;
+}
+
+.detailTitle {
+  margin: 0 0 10px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tokenStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.tokenStat {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.tokenLabel {
+  font-weight: 500;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.tokenValue {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.errorBox {
+  padding: 15px;
+  background-color: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 4px;
+}
+
+.errorMessage,
+.errorCode {
+  margin-bottom: 10px;
+  color: #c62828;
+  font-size: 0.9rem;
+}
+
+.errorMessage:last-child,
+.errorCode:last-child {
+  margin-bottom: 0;
+}
+
+.errorMessage strong,
+.errorCode strong {
+  font-weight: 600;
+}
+
+.retryButton {
+  margin-top: 10px;
+  padding: 8px 14px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retryButton:hover {
+  background-color: #1976d2;
+}
+
+.codeBlock {
+  margin: 0;
+  padding: 15px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #333;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.contentBox {
+  padding: 15px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #333;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.pendingMessage {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.spinner {
+  font-size: 1.5rem;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

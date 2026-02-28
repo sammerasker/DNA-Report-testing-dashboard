@@ -1,0 +1,145 @@
+.rawDataPanel {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #000;
+}
+
+.validationBadge {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.validationBadge.valid {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #66bb6a;
+}
+
+.validationBadge.invalid {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef5350;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.toolbarButton {
+  padding: 8px 14px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #000;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  position: relative;
+}
+
+.toolbarButton:hover:not(:disabled) {
+  background-color: #e0e0e0;
+  border-color: #999;
+}
+
+.toolbarButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fileInput {
+  display: none;
+}
+
+.stats {
+  margin-left: auto;
+  display: flex;
+  gap: 15px;
+}
+
+.stat {
+  font-size: 0.85rem;
+  color: #000;
+  font-weight: 500;
+}
+
+.editorContainer {
+  flex: 1;
+  min-height: 400px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.editor {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  padding: 15px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border: none;
+  outline: none;
+  resize: vertical;
+  background-color: #fafafa;
+  color: #000;
+}
+
+.editor:focus {
+  background-color: #fff;
+}
+
+.editorError {
+  background-color: #fff5f5;
+  border-left: 3px solid #ef5350;
+}
+
+.errorMessage {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 4px;
+  color: #c62828;
+  font-size: 0.9rem;
+}
+
+.errorMessage strong {
+  font-weight: 600;
+}
+
+.infoMessage {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: #e3f2fd;
+  border: 1px solid #2196f3;
+  border-radius: 4px;
+  color: #1565c0;
+  font-size: 0.9rem;
+}

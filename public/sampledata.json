@@ -1,0 +1,49 @@
+{
+  "profile": {
+    "name": "Marion Anderson",
+    "email": "marion.anderson@example.com",
+    "userType": "Visionary Entrepreneur"
+  },
+  "normalizedScores": {
+    "speed": 85,
+    "abstraction": 72,
+    "creativity": 90,
+    "structure": 45,
+    "planning": 50,
+    "detail": 42,
+    "risk": 78,
+    "resilience": 75,
+    "empathy": 65,
+    "influence": 82,
+    "leadership": 80,
+    "mission": 88,
+    "ambiguity": 82,
+    "learning": 70,
+    "collaboration": 68,
+    "autonomy": 85
+  },
+  "rolesTop": [
+    {
+      "role": "Product-Led Founder",
+      "score": 94,
+      "rationale": "Strong vision and creativity combined with high influence make this an ideal role"
+    },
+    {
+      "role": "Visionary CEO",
+      "score": 88,
+      "rationale": "High abstraction and mission alignment suit strategic leadership"
+    },
+    {
+      "role": "Innovation Director",
+      "score": 85,
+      "rationale": "Exceptional creativity and pattern recognition drive innovation"
+    }
+  ],
+  "domains": {
+    "cognitive_vision": ["speed", "abstraction", "creativity"],
+    "execution_discipline": ["structure", "planning", "detail"],
+    "social_influence": ["leadership", "influence", "empathy"],
+    "resilience_drive": ["resilience", "risk", "mission"]
+  },
+  "completedAt": "2026-02-27T10:30:00Z"
+}
