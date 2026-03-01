@@ -128,13 +128,13 @@ export default function EnrichedDataPanel({
 
   if (!isEnrichmentEnabled) {
     return (
-      <div className={styles.enrichedDataPanel}>
+      <div className={styles.enrichedDataPanel} style={{ color: '#000', backgroundColor: '#fff' }}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Enriched Context</h2>
+          <h2 className={styles.title} style={{ color: '#000' }}>Enriched Context</h2>
         </div>
-        <div className={styles.disabledMessage}>
-          <p>Data enrichment is currently disabled.</p>
-          <p>Enable enrichment in the Control Panel to see enriched context.</p>
+        <div className={styles.disabledMessage} style={{ color: '#000' }}>
+          <p style={{ color: '#000' }}>Data enrichment is currently disabled.</p>
+          <p style={{ color: '#000' }}>Enable enrichment in the Control Panel to see enriched context.</p>
         </div>
       </div>
     );
@@ -142,62 +142,63 @@ export default function EnrichedDataPanel({
 
   if (!enrichedContext) {
     return (
-      <div className={styles.enrichedDataPanel}>
+      <div className={styles.enrichedDataPanel} style={{ color: '#000', backgroundColor: '#fff' }}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Enriched Context</h2>
+          <h2 className={styles.title} style={{ color: '#000' }}>Enriched Context</h2>
         </div>
-        <div className={styles.emptyMessage}>
-          <p>No enriched context available.</p>
-          <p>Generate a report to see enriched assessment data.</p>
+        <div className={styles.emptyMessage} style={{ color: '#000' }}>
+          <p style={{ color: '#000' }}>No enriched context available.</p>
+          <p style={{ color: '#000' }}>Generate a report to see enriched assessment data.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={styles.enrichedDataPanel}>
+    <div className={styles.enrichedDataPanel} style={{ color: '#000', backgroundColor: '#fff' }}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Enriched Context</h2>
+        <h2 className={styles.title} style={{ color: '#000' }}>Enriched Context</h2>
       </div>
 
       {/* Toolbar */}
       <div className={styles.toolbar}>
-        <button onClick={handleExpandAll} className={styles.toolbarButton}>
+        <button onClick={handleExpandAll} className={styles.toolbarButton} style={{ color: '#000' }}>
           {Object.values(expandedSections).every(v => v) ? '▼ Collapse All' : '▶ Expand All'}
         </button>
         
-        <button onClick={handleCopy} className={styles.toolbarButton}>
+        <button onClick={handleCopy} className={styles.toolbarButton} style={{ color: '#000' }}>
           {copySuccess ? '✓ Copied!' : '📋 Copy'}
         </button>
 
         <div className={styles.stats}>
-          <span className={styles.stat}>{lineCount} lines</span>
-          <span className={styles.stat}>{charCount.toLocaleString()} chars</span>
-          <span className={styles.stat}>~{tokenEstimate.toLocaleString()} tokens</span>
+          <span className={styles.stat} style={{ color: '#000' }}>{lineCount} lines</span>
+          <span className={styles.stat} style={{ color: '#000' }}>{charCount.toLocaleString()} chars</span>
+          <span className={styles.stat} style={{ color: '#000' }}>~{tokenEstimate.toLocaleString()} tokens</span>
         </div>
       </div>
 
       {/* Sections */}
-      <div className={styles.sectionsContainer}>
+      <div className={styles.sectionsContainer} style={{ color: '#000' }}>
         {Object.entries(sections).map(([header, content]) => {
           const sectionKey = sectionKeyMap[header];
           const isExpanded = expandedSections[sectionKey];
 
           return (
-            <div key={header} className={styles.section}>
+            <div key={header} className={styles.section} style={{ backgroundColor: '#fff' }}>
               <button
                 onClick={() => toggleSection(sectionKey)}
                 className={styles.sectionHeader}
+                style={{ color: '#000' }}
               >
-                <span className={styles.sectionIcon}>
+                <span className={styles.sectionIcon} style={{ color: '#000' }}>
                   {isExpanded ? '▼' : '▶'}
                 </span>
-                <span className={styles.sectionTitle}>{header}</span>
+                <span className={styles.sectionTitle} style={{ color: '#000' }}>{header}</span>
               </button>
               
               {isExpanded && (
-                <div className={styles.sectionContent}>
-                  <pre className={styles.contentText}>{content}</pre>
+                <div className={styles.sectionContent} style={{ color: '#000', backgroundColor: '#fafafa' }}>
+                  <pre className={styles.contentText} style={{ color: '#000', backgroundColor: '#fafafa' }}>{content}</pre>
                 </div>
               )}
             </div>

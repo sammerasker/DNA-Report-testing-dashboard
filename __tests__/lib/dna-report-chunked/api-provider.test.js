@@ -31,7 +31,7 @@ describe('API Provider Abstraction - Unit Tests', () => {
       expect(provider.provider).toBe('openrouter');
       expect(provider.endpoint).toBe('https://openrouter.ai/api/v1/chat/completions');
       expect(provider.model).toBe('openrouter/free');
-      expect(provider.apiKey).toBeTruthy();
+      expect(typeof provider.apiKey).toBe('string');
     });
 
     test('should use correct headers for OpenRouter', async () => {

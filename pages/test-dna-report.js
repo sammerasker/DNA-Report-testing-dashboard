@@ -17,7 +17,7 @@ import { enrichAssessmentData } from '../lib/dna-report-chunked/enrichment';
 import { createChunkExecutor } from '../lib/dna-report-chunked/chunk-executor';
 import ReportAssembler from '../lib/dna-report-chunked/report-assembler';
 import QualityMetrics from '../lib/dna-report-chunked/quality-metrics';
-import { createOpenRouterProvider, createHuggingFaceProvider } from '../lib/dna-report-chunked/api-provider';
+import { createOpenRouterProvider, createHuggingFaceProvider, createMoonshotProvider } from '../lib/dna-report-chunked/api-provider';
 import { createMonolithicGenerator } from '../lib/dna-report-chunked/monolithic-generator';
 
 export default function TestDNAReport() {
@@ -34,6 +34,7 @@ export default function TestDNAReport() {
   // UI state
   const [enrichmentEnabled, setEnrichmentEnabled] = useState(true);
   const [architecture, setArchitecture] = useState('chunked'); // 'chunked', 'monolithic', 'comparison'
+  const [batchDelay, setBatchDelay] = useState(5); // Default 5 seconds
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
   
@@ -50,6 +51,7 @@ export default function TestDNAReport() {
   const [tokenCount, setTokenCount] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [startTime, setStartTime] = useState(null);
+  const [requestsUsed, setRequestsUsed] = useState(0);
   
   // ===== Load Sample Data on Mount (Task 9.14) =====
   useEffect(() => {
@@ -98,6 +100,8 @@ export default function TestDNAReport() {
       setModel('openrouter/free');
     } else if (newProvider === 'huggingface') {
       setModel('openai/gpt-oss-20b');
+    } else if (newProvider === 'moonshot') {
+      setModel('moonshot-v1-8k');
     }
   };
   
@@ -120,6 +124,13 @@ export default function TestDNAReport() {
    */
   const handleArchitectureChange = (mode) => {
     setArchitecture(mode);
+  };
+  
+  /**
+   * Handle batch delay change
+   */
+  const handleBatchDelayChange = (delay) => {
+    setBatchDelay(delay);
   };
   
   /**
@@ -148,6 +159,7 @@ export default function TestDNAReport() {
       setStartTime(genStartTime);
       setTokenCount(0);
       setElapsedTime(0);
+      setRequestsUsed(0);
       setChunkResults([]);
       setAssembledReport('');
       setQualityMetrics(null);
@@ -166,11 +178,30 @@ export default function TestDNAReport() {
         setEnrichedContext('');
       }
       
-      // Step 2: Create API provider based on selected provider
+      // Step 2: Create API provider based on selected provider and fallback providers
       console.log(`[TestPage] Creating API provider: ${provider}`);
-      const apiProvider = provider === 'openrouter'
-        ? createOpenRouterProvider()
-        : createHuggingFaceProvider();
+      let apiProvider;
+      let fallbackProviders = [];
+      
+      // Create primary provider
+      if (provider === 'openrouter') {
+        apiProvider = createOpenRouterProvider();
+        // Fallback order: HuggingFace -> Moonshot
+        fallbackProviders = [createHuggingFaceProvider(), createMoonshotProvider()];
+      } else if (provider === 'huggingface') {
+        apiProvider = createHuggingFaceProvider();
+        // Fallback order: Moonshot -> OpenRouter
+        fallbackProviders = [createMoonshotProvider(), createOpenRouterProvider()];
+      } else if (provider === 'moonshot') {
+        apiProvider = createMoonshotProvider();
+        // Fallback order: OpenRouter -> HuggingFace
+        fallbackProviders = [createOpenRouterProvider(), createHuggingFaceProvider()];
+      } else {
+        apiProvider = createOpenRouterProvider(); // fallback
+        fallbackProviders = [createHuggingFaceProvider(), createMoonshotProvider()];
+      }
+      
+      console.log(`[TestPage] Fallback providers configured: ${fallbackProviders.map(p => p.provider).join(' -> ')}`);
       
       // Step 3: Execute based on architecture mode
       if (architecture === 'comparison') {
@@ -187,7 +218,9 @@ export default function TestDNAReport() {
                 maxTokens: 1500,
                 temperature: 0.7,
                 useEnrichment: enrichmentEnabled,
-                rawData: enrichmentEnabled ? null : assessmentData
+                rawData: enrichmentEnabled ? null : assessmentData,
+                batchDelay: batchDelay,
+                providerFallback: fallbackProviders
               }
             );
             return chunks;
@@ -209,6 +242,7 @@ export default function TestDNAReport() {
         console.log(`[TestPage] Chunked: ${chunkedResult.length} chunks executed`);
         
         const chunkedTokens = chunkedResult.reduce((sum, chunk) => sum + (chunk.totalTokens || 0), 0);
+        const chunkedRequests = chunkedResult.length; // Each chunk = 1 request
         
         // Assemble chunked report
         const assembler = new ReportAssembler();
@@ -243,6 +277,8 @@ export default function TestDNAReport() {
         console.log(`[TestPage] Monolithic: ${monolithicResult.status}`);
         setMonolithicReport(monolithicResult.content);
         
+        const monolithicRequests = 1; // Monolithic = 1 request
+        
         // Calculate monolithic metrics (only if report is not empty)
         let monolithicMetrics = null;
         if (monolithicResult.content && monolithicResult.content.trim().length > 0) {
@@ -256,6 +292,9 @@ export default function TestDNAReport() {
         
         // Set total token count (sum of both)
         setTokenCount(chunkedTokens + (monolithicResult.totalTokens || 0));
+        
+        // Set total requests used (sum of both)
+        setRequestsUsed(chunkedRequests + monolithicRequests);
         
         // Log comparison results
         const chunkedScore = chunkedMetrics ? chunkedMetrics.overallScore : 'N/A';
@@ -273,7 +312,9 @@ export default function TestDNAReport() {
             maxTokens: 1500,
             temperature: 0.7,
             useEnrichment: enrichmentEnabled,
-            rawData: enrichmentEnabled ? null : assessmentData
+            rawData: enrichmentEnabled ? null : assessmentData,
+            batchDelay: batchDelay,
+            providerFallback: fallbackProviders
           }
         );
         
@@ -283,6 +324,9 @@ export default function TestDNAReport() {
         // Calculate total tokens
         const totalTokens = chunks.reduce((sum, chunk) => sum + (chunk.totalTokens || 0), 0);
         setTokenCount(totalTokens);
+        
+        // Set requests used (each chunk = 1 request)
+        setRequestsUsed(chunks.length);
         
         // Check if any chunks failed
         const failedChunks = chunks.filter(c => c.status === 'error');
@@ -345,6 +389,9 @@ export default function TestDNAReport() {
         
         // Set token count
         setTokenCount(result.totalTokens || 0);
+        
+        // Set requests used (monolithic = 1 request)
+        setRequestsUsed(1);
         
         // Calculate quality metrics (only if report is not empty)
         if (result.content && result.content.trim().length > 0) {
@@ -483,14 +530,17 @@ export default function TestDNAReport() {
               onModelChange={handleModelChange}
               onEnrichmentToggle={handleEnrichmentToggle}
               onArchitectureChange={handleArchitectureChange}
+              onBatchDelayChange={handleBatchDelayChange}
               provider={provider}
               model={model}
               enrichmentEnabled={enrichmentEnabled}
               architecture={architecture}
+              batchDelay={batchDelay}
               status={status}
               tokenCount={tokenCount}
               elapsedTime={elapsedTime}
               errorMessage={errorMessage}
+              requestsUsed={requestsUsed}
             />
           </div>
 

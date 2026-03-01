@@ -373,7 +373,7 @@ describe('API Provider Abstraction - Property Tests', () => {
 
           const expectedEndpoint = providerType === 'openrouter'
             ? 'https://openrouter.ai/api/v1/chat/completions'
-            : 'https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-3B-Instruct/v1/chat/completions';
+            : 'https://router.huggingface.co/v1/chat/completions';
 
           return endpoint === expectedEndpoint;
         }
@@ -671,81 +671,6 @@ describe('API Provider Abstraction - Property Tests', () => {
    * Property 15: Provider Configuration Consistency
    * Validates: Requirements 5.4
    * 
-   * For any API provider (Cerebras or OpenRouter), the response structure should be identical,
-   * containing the same fields: content, metadata (with all sub-fields), and error.
-   * This ensures consistent handling across different providers.
-   */
-  test('Property 15: Response structure identical across Cerebras and OpenRouter', async () => {
-    await fc.assert(
-      fc.asyncProperty(
-        messagesArrayArbitrary,
-        fc.integer({ min: 10, max: 100 }), // prompt_tokens
-        fc.integer({ min: 20, max: 200 }), // completion_tokens
-        async (messages, promptTokens, completionTokens) => {
-          jest.clearAllMocks();
-          
-          const totalTokens = promptTokens + completionTokens;
-          
-          // Test both providers
-          const providers = [
-            { type: 'cerebras', provider: createCerebrasProvider() },
-            { type: 'openrouter', provider: createOpenRouterProvider() }
-          ];
-          
-          const results = [];
-          
-          for (const { type, provider } of providers) {
-            // Mock successful response
-            global.fetch.mockResolvedValueOnce({
-              ok: true,
-              json: async () => ({
-                choices: [{ message: { content: `Response from ${type}` } }],
-                usage: {
-                  prompt_tokens: promptTokens,
-                  completion_tokens: completionTokens,
-                  total_tokens: totalTokens
-                }
-              })
-            });
-
-            const result = await provider.generateCompletion({ messages });
-            results.push(result);
-          }
-
-          // Verify both results have the same structure
-          const [cerebrasResult, openrouterResult] = results;
-
-          // Check top-level fields
-          const cerebrasKeys = Object.keys(cerebrasResult).sort();
-          const openrouterKeys = Object.keys(openrouterResult).sort();
-          
-          if (JSON.stringify(cerebrasKeys) !== JSON.stringify(openrouterKeys)) {
-            return false;
-          }
-
-          // Verify both have content, metadata, and error fields
-          if (!cerebrasResult.hasOwnProperty('content') || !openrouterResult.hasOwnProperty('content')) {
-            return false;
-          }
-          if (!cerebrasResult.hasOwnProperty('metadata') || !openrouterResult.hasOwnProperty('metadata')) {
-            return false;
-          }
-          if (!cerebrasResult.hasOwnProperty('error') || !openrouterResult.hasOwnProperty('error')) {
-            return false;
-          }
-
-          // Check metadata structure
-          const cerebrasMetadataKeys = Object.keys(cerebrasResult.metadata).sort();
-          const openrouterMetadataKeys = Object.keys(openrouterResult.metadata).sort();
-          
-          if (JSON.stringify(cerebrasMetadataKeys) !== JSON.stringify(openrouterMetadataKeys)) {
-            return false;
-          }
-
-  /**
-   * Property 15: Provider Configuration Consistency
-   * Validates: Requirements 5.4
-   * 
    * For any API provider (OpenRouter or Hugging Face), the response structure should be identical,
    * containing the same fields: content, metadata (with all sub-fields), and error.
    * This ensures consistent handling across different providers.
@@ -916,5 +841,3 @@ describe('API Provider Abstraction - Property Tests', () => {
     );
   });
 });
-
-}));

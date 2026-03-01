@@ -1,0 +1,176 @@
+.limitsCounter {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 15px;
+  transition: opacity 0.2s;
+}
+
+.header:hover {
+  opacity: 0.7;
+}
+
+.headerIcon {
+  margin-right: 10px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.headerTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.providerSection {
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.providerSection.active {
+  background: #e8f5e9;
+  border-color: #4caf50;
+}
+
+.providerName {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activeBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #4caf50;
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.usageRow {
+  display: grid;
+  grid-template-columns: 120px 1fr 100px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.usageRow:last-child {
+  margin-bottom: 0;
+}
+
+.usageLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.resetTime {
+  font-size: 0.75rem;
+  color: #999;
+  font-weight: 400;
+}
+
+.usageBar {
+  height: 20px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.usageProgress {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 10px;
+}
+
+.usageStats {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #333;
+  font-weight: 500;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .limitsCounter {
+    background: #ffffff;
+    border-color: #e0e0e0;
+  }
+  
+  .headerIcon,
+  .headerTitle,
+  .providerName,
+  .usageLabel,
+  .usageStats {
+    color: #333 !important;
+  }
+  
+  .providerSection {
+    background: #f9f9f9;
+  }
+  
+  .providerSection.active {
+    background: #e8f5e9;
+  }
+  
+  .usageBar {
+    background: #e0e0e0;
+  }
+  
+  .resetTime {
+    color: #999 !important;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .usageRow {
+    grid-template-columns: 100px 1fr 80px;
+    gap: 8px;
+  }
+  
+  .usageLabel {
+    font-size: 0.8rem;
+  }
+  
+  .resetTime {
+    font-size: 0.7rem;
+  }
+  
+  .usageStats {
+    font-size: 0.75rem;
+  }
+}

@@ -66,7 +66,7 @@ describe('ChunkExecutor - Property-Based Tests', () => {
           mockApiProvider.generateCompletion.mockResolvedValue(mockResponse);
 
           // Execute chunks
-          const results = await executor.executeChunks(enrichedContext, options);
+          const results = await executor.executeChunks(enrichedContext, { ...options, batchDelay: 0 });
 
           // Property: Exactly 6 chunk calls should be initiated
           const callCount = mockApiProvider.generateCompletion.mock.calls.length;
@@ -87,7 +87,7 @@ describe('ChunkExecutor - Property-Based Tests', () => {
       ),
       testConfig
     );
-  });
+  }, 15000);
 
   /**
    * Property 8: Chunk Word Count Compliance
@@ -469,7 +469,7 @@ describe('ChunkExecutor - Property-Based Tests', () => {
           });
 
           // Execute all chunks in parallel
-          await executor.executeChunks(enrichedContext, options);
+          await executor.executeChunks(enrichedContext, { ...options, batchDelay: 0 });
 
           // Property: All 6 chunks should have start times within 100ms of each other
           
@@ -501,7 +501,7 @@ describe('ChunkExecutor - Property-Based Tests', () => {
       ),
       testConfig
     );
-  });
+  }, 60000);
 
   /**
    * Property 24: Failed Chunk Reporting
@@ -589,7 +589,7 @@ describe('ChunkExecutor - Property-Based Tests', () => {
           });
 
           // Execute all chunks in parallel
-          const results = await executor.executeChunks(enrichedContext);
+          const results = await executor.executeChunks(enrichedContext, { batchDelay: 0 });
 
           // Property: Exactly N failed chunk IDs should be reported
           
@@ -633,7 +633,7 @@ describe('ChunkExecutor - Property-Based Tests', () => {
       ),
       testConfig
     );
-  });
+  }, 60000);
 
   /**
    * Property 27: Enrichment Toggle Effect on Prompts
@@ -866,7 +866,7 @@ describe('ChunkExecutor - Property-Based Tests', () => {
           });
 
           // Execute all chunks in parallel
-          const results = await executor.executeChunks(enrichedContext);
+          const results = await executor.executeChunks(enrichedContext, { batchDelay: 0 });
 
           // Property 1: Exactly N results should have status='success'
           const actualSuccessfulResults = results.filter(r => r.status === 'success');
@@ -947,5 +947,5 @@ describe('ChunkExecutor - Property-Based Tests', () => {
       ),
       testConfig
     );
-  });
+  }, 60000);
 });

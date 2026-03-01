@@ -10,6 +10,7 @@
 
 import React from 'react';
 import styles from './ControlPanel.module.css';
+import LimitsCounter from './LimitsCounter';
 
 /**
  * @typedef {Object} ControlPanelProps
@@ -18,14 +19,17 @@ import styles from './ControlPanel.module.css';
  * @property {Function} onModelChange - Callback when model selection changes
  * @property {Function} onEnrichmentToggle - Callback when enrichment toggle changes
  * @property {Function} onArchitectureChange - Callback when architecture mode changes
+ * @property {Function} onBatchDelayChange - Callback when batch delay changes
  * @property {string} provider - Current API provider ('openrouter' or 'huggingface')
  * @property {string} model - Current model selection
  * @property {boolean} enrichmentEnabled - Whether data enrichment is enabled
  * @property {string} architecture - Architecture mode ('chunked', 'monolithic', 'comparison')
+ * @property {number} batchDelay - Delay in seconds between chunk batches (0, 2, 5, 10, 15)
  * @property {string} status - Current status ('idle', 'generating', 'complete', 'error')
  * @property {number} tokenCount - Total tokens used
  * @property {number} elapsedTime - Elapsed time in milliseconds
  * @property {string} [errorMessage] - Error message if status is 'error'
+ * @property {number} [requestsUsed] - Number of API requests used in current generation
  */
 
 /**
@@ -38,14 +42,17 @@ export default function ControlPanel({
   onModelChange,
   onEnrichmentToggle,
   onArchitectureChange,
+  onBatchDelayChange,
   provider = 'openrouter',
   model = '',
   enrichmentEnabled = true,
   architecture = 'chunked',
+  batchDelay = 5,
   status = 'idle',
   tokenCount = 0,
   elapsedTime = 0,
-  errorMessage = ''
+  errorMessage = '',
+  requestsUsed = 0
 }) {
   // Model options based on provider
   const modelOptions = {
@@ -59,6 +66,11 @@ export default function ControlPanel({
       { value: 'meta-llama/Llama-3.2-3B-Instruct', label: 'Llama 3.2 3B Instruct' },
       { value: 'mistralai/Mistral-7B-Instruct-v0.2', label: 'Mistral 7B Instruct v0.2' },
       { value: 'google/flan-t5-xxl', label: 'FLAN-T5 XXL' }
+    ],
+    moonshot: [
+      { value: 'moonshot-v1-8k', label: 'Moonshot v1 8K (Default)' },
+      { value: 'moonshot-v1-32k', label: 'Moonshot v1 32K' },
+      { value: 'moonshot-v1-128k', label: 'Moonshot v1 128K' }
     ]
   };
 
@@ -101,6 +113,7 @@ export default function ControlPanel({
         >
           <option value="openrouter">OpenRouter</option>
           <option value="huggingface">Hugging Face</option>
+          <option value="moonshot">Moonshot</option>
         </select>
       </div>
 
@@ -162,7 +175,7 @@ export default function ControlPanel({
           <option value="comparison">Comparison (Both Side-by-Side)</option>
         </select>
         <p className={styles.helpText}>
-          {architecture === 'chunked' && '⚡ Fast parallel execution with 6 chunks'}
+          {architecture === 'chunked' && '⚡ Batched execution: 2 chunks at a time'}
           {architecture === 'monolithic' && '📄 Single coherent report in one API call'}
           {architecture === 'comparison' && '📊 Compare both architectures side-by-side'}
         </p>
@@ -195,14 +208,43 @@ export default function ControlPanel({
           <div className={styles.infoBox}>
             <strong>⚡ Chunked Mode:</strong>
             <ul className={styles.infoList}>
-              <li>6 chunks execute in parallel</li>
-              <li>Faster overall completion</li>
+              <li>Executes 2 chunks at a time (3 batches total)</li>
+              <li>Configurable delay between batches</li>
+              <li>Automatic provider fallback on errors</li>
               <li>Can retry individual failed chunks</li>
-              <li>Comprehensive coverage</li>
             </ul>
           </div>
         )}
       </div>
+
+      {/* Batch Delay Selection - Only show for chunked mode */}
+      {architecture === 'chunked' && (
+        <div className={styles.formGroup}>
+          <label htmlFor="batchDelay" className={styles.label}>
+            Batch Delay (Rate Limit Protection)
+          </label>
+          <select
+            id="batchDelay"
+            value={batchDelay}
+            onChange={(e) => onBatchDelayChange(Number(e.target.value))}
+            disabled={isGenerating}
+            className={styles.select}
+          >
+            <option value={0}>0 seconds (No delay)</option>
+            <option value={2}>2 seconds</option>
+            <option value={5}>5 seconds (Recommended)</option>
+            <option value={10}>10 seconds (Very safe)</option>
+            <option value={15}>15 seconds (Maximum safety)</option>
+          </select>
+          <p className={styles.helpText}>
+            {batchDelay === 0 && '⚠️ No delay - may hit rate limits'}
+            {batchDelay === 2 && '⏱️ Short delay - good for most providers'}
+            {batchDelay === 5 && '✅ Balanced - recommended for free tiers'}
+            {batchDelay === 10 && '🛡️ Safe - avoids most rate limits'}
+            {batchDelay === 15 && '🐢 Maximum safety - slowest but safest'}
+          </p>
+        </div>
+      )}
 
       {/* Generate Button */}
       <div className={styles.formGroup}>
@@ -257,6 +299,12 @@ export default function ControlPanel({
           Report generated successfully!
         </div>
       )}
+
+      {/* API Limits Counter */}
+      <LimitsCounter 
+        currentProvider={provider}
+        requestsUsed={requestsUsed}
+      />
     </div>
   );
 }

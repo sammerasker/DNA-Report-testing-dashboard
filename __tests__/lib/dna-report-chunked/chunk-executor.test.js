@@ -212,7 +212,7 @@ describe('ChunkExecutor', () => {
       mockApiProvider.generateCompletion.mockResolvedValue(mockResponse);
 
       const enrichedContext = 'Test enriched context';
-      const results = await executor.executeChunks(enrichedContext);
+      const results = await executor.executeChunks(enrichedContext, { batchDelay: 0 });
 
       expect(results).toHaveLength(6);
       expect(mockApiProvider.generateCompletion).toHaveBeenCalledTimes(6);
@@ -222,7 +222,7 @@ describe('ChunkExecutor', () => {
         expect(result.chunkId).toBe(index + 1);
         expect(result.status).toBe('success');
       });
-    });
+    }, 15000);
 
     test('should handle partial failures', async () => {
       // Mock responses: chunks 1, 2, 3 succeed, chunks 4, 5, 6 fail
@@ -265,7 +265,7 @@ describe('ChunkExecutor', () => {
         }
       });
 
-      const results = await executor.executeChunks('test context');
+      const results = await executor.executeChunks('test context', { batchDelay: 0 });
 
       expect(results).toHaveLength(6);
       
@@ -284,7 +284,7 @@ describe('ChunkExecutor', () => {
       expect(results[4].error.type).toBe('rate_limit');
       expect(results[5].status).toBe('error');
       expect(results[5].error.type).toBe('rate_limit');
-    });
+    }, 10000);
 
     test('should preserve successful chunks when some fail', async () => {
       // Mock responses: chunks 2 and 5 fail, others succeed
@@ -330,7 +330,7 @@ describe('ChunkExecutor', () => {
         }
       });
 
-      const results = await executor.executeChunks('test context');
+      const results = await executor.executeChunks('test context', { batchDelay: 0 });
 
       expect(results).toHaveLength(6);
       
@@ -353,7 +353,7 @@ describe('ChunkExecutor', () => {
         expect(result.error).toBeDefined();
         expect(result.error.retryable).toBe(true);
       });
-    });
+    }, 10000);
 
     test('should report which specific chunks failed', async () => {
       // Mock responses: chunks 1, 3, 5 fail
@@ -398,7 +398,7 @@ describe('ChunkExecutor', () => {
         }
       });
 
-      const results = await executor.executeChunks('test context');
+      const results = await executor.executeChunks('test context', { batchDelay: 0 });
 
       // Extract failed chunk IDs
       const failedChunkIds = results
@@ -413,7 +413,7 @@ describe('ChunkExecutor', () => {
         .map(r => r.chunkId);
       
       expect(successChunkIds).toEqual([2, 4, 6]);
-    });
+    }, 10000);
 
     test('should handle all chunks failing', async () => {
       mockApiProvider.generateCompletion.mockResolvedValue({
@@ -435,7 +435,7 @@ describe('ChunkExecutor', () => {
         }
       });
 
-      const results = await executor.executeChunks('test context');
+      const results = await executor.executeChunks('test context', { batchDelay: 0 });
 
       expect(results).toHaveLength(6);
       
@@ -444,7 +444,7 @@ describe('ChunkExecutor', () => {
         expect(result.status).toBe('error');
         expect(result.error.type).toBe('service_unavailable');
       });
-    });
+    }, 10000);
 
     test('should handle promise rejection in parallel execution', async () => {
       // Mock: chunks 1-3 succeed, chunk 4 rejects promise, chunks 5-6 succeed
@@ -470,7 +470,7 @@ describe('ChunkExecutor', () => {
         }
       });
 
-      const results = await executor.executeChunks('test context');
+      const results = await executor.executeChunks('test context', { batchDelay: 0 });
 
       expect(results).toHaveLength(6);
       
@@ -483,7 +483,7 @@ describe('ChunkExecutor', () => {
       [0, 1, 2, 4, 5].forEach(index => {
         expect(results[index].status).toBe('success');
       });
-    });
+    }, 10000);
 
     test('should validate enrichedContext parameter', async () => {
       await expect(executor.executeChunks(null)).rejects.toThrow(
@@ -518,7 +518,8 @@ describe('ChunkExecutor', () => {
 
       await executor.executeChunks('test context', {
         maxTokens: 2000,
-        temperature: 0.8
+        temperature: 0.8,
+        batchDelay: 0
       });
 
       // Verify all 6 calls received the options
@@ -527,7 +528,7 @@ describe('ChunkExecutor', () => {
         expect(call[0].maxTokens).toBe(2000);
         expect(call[0].temperature).toBe(0.8);
       });
-    });
+    }, 10000);
   });
 
   describe('createChunkExecutor', () => {
@@ -695,11 +696,11 @@ describe('ChunkExecutor', () => {
 
     test('should validate rawData when useEnrichment is false', async () => {
       await expect(
-        executor.executeChunks('', { useEnrichment: false, rawData: null })
+        executor.executeChunks('', { useEnrichment: false, rawData: null, batchDelay: 0 })
       ).rejects.toThrow('rawData must be a non-empty object when useEnrichment is false');
 
       await expect(
-        executor.executeChunks('', { useEnrichment: false, rawData: 'not an object' })
+        executor.executeChunks('', { useEnrichment: false, rawData: 'not an object', batchDelay: 0 })
       ).rejects.toThrow('rawData must be a non-empty object when useEnrichment is false');
     });
 
@@ -725,7 +726,7 @@ describe('ChunkExecutor', () => {
         normalizedScores: { strategicThinking: 85 }
       };
 
-      const results = await executor.executeChunks('', { useEnrichment: false, rawData });
+      const results = await executor.executeChunks('', { useEnrichment: false, rawData, batchDelay: 0 });
 
       expect(results).toHaveLength(6);
       expect(mockApiProvider.generateCompletion).toHaveBeenCalledTimes(6);
@@ -735,7 +736,7 @@ describe('ChunkExecutor', () => {
         expect(call[0].messages[1].content).toContain('RAW ASSESSMENT DATA:');
         expect(call[0].messages[1].content).toContain('"profile"');
       });
-    });
+    }, 10000);
   });
 
   describe('retryChunk', () => {

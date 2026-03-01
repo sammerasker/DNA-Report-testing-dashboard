@@ -1,5 +1,5 @@
 .enrichedDataPanel {
-  background: #ffffff;
+  background: #ffffff !important;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 20px;
@@ -7,6 +7,12 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  color: #000 !important;
+}
+
+/* Force all descendants to have black text */
+.enrichedDataPanel * {
+  color: #000 !important;
 }
 
 .header {
@@ -17,7 +23,7 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #000;
+  color: #000 !important;
 }
 
 .toolbar {
@@ -36,7 +42,7 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 0.9rem;
-  color: #000;
+  color: #000 !important;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
 }
@@ -54,7 +60,7 @@
 
 .stat {
   font-size: 0.85rem;
-  color: #000;
+  color: #000 !important;
   font-weight: 500;
 }
 
@@ -89,21 +95,33 @@
 .sectionIcon {
   margin-right: 10px;
   font-size: 0.8rem;
-  color: #000;
+  color: #000 !important;
   width: 12px;
   display: inline-block;
 }
 
 .sectionTitle {
   font-weight: 600;
-  color: #000;
+  color: #000 !important;
   font-size: 0.95rem;
 }
 
 .sectionContent {
   padding: 15px;
-  background-color: #fafafa;
+  background-color: #fafafa !important;
   border-top: 1px solid #e0e0e0;
+  color: #000 !important;
+}
+
+/* Force light background even in dark mode */
+@media (prefers-color-scheme: dark) {
+  .sectionContent {
+    background-color: #fafafa;
+  }
+  
+  .enrichedDataPanel {
+    background: #ffffff;
+  }
 }
 
 .contentText {
@@ -114,24 +132,93 @@
   color: #000 !important;
   white-space: pre-wrap;
   word-wrap: break-word;
+  background-color: #fafafa;
+}
+
+/* Force black text even in dark mode */
+@media (prefers-color-scheme: dark) {
+  .contentText {
+    color: #000 !important;
+    background-color: #fafafa !important;
+  }
+  
+  /* Force all child elements to have black text */
+  .contentText * {
+    color: #000 !important;
+  }
+  
+  /* Specifically target pre tags */
+  pre.contentText {
+    color: #000 !important;
+  }
+  
+  .sectionsContainer {
+    background-color: #ffffff;
+  }
+  
+  .sectionsContainer * {
+    color: #000 !important;
+  }
+  
+  .section {
+    background-color: #ffffff;
+    border-color: #e0e0e0;
+  }
+  
+  .sectionHeader {
+    background-color: #f5f5f5;
+  }
+  
+  .sectionHeader:hover {
+    background-color: #e8e8e8;
+  }
+  
+  .sectionIcon,
+  .sectionTitle {
+    color: #000 !important;
+  }
+  
+  .toolbar {
+    border-bottom-color: #e0e0e0;
+  }
+  
+  .toolbarButton {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+    color: #000 !important;
+  }
+  
+  .toolbarButton:hover {
+    background-color: #e0e0e0;
+    border-color: #999;
+  }
+  
+  .stat {
+    color: #000 !important;
+  }
+  
+  .title {
+    color: #000 !important;
+  }
 }
 
 .disabledMessage,
 .emptyMessage {
   padding: 40px 20px;
   text-align: center;
-  color: #000;
+  color: #000 !important;
 }
 
 .disabledMessage p,
 .emptyMessage p {
   margin: 10px 0;
   font-size: 0.95rem;
+  color: #000 !important;
 }
 
 .disabledMessage p:first-child,
 .emptyMessage p:first-child {
   font-weight: 600;
   font-size: 1.1rem;
-  color: #000;
+  color: #000 !important;
 }
