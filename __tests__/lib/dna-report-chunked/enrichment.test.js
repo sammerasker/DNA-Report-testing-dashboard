@@ -92,7 +92,7 @@ describe('Data Enrichment Layer - Unit Tests', () => {
 
     test('should be a reasonably long output', () => {
       expect(enriched.length).toBeGreaterThan(3000);
-      expect(enriched.length).toBeLessThan(10000);
+      expect(enriched.length).toBeLessThan(20000); // Increased to accommodate language guidelines
     });
   });
 
@@ -372,6 +372,82 @@ describe('Data Enrichment Layer - Unit Tests', () => {
         rolesTop: []
       };
       expect(() => enrichAssessmentData(assessment)).not.toThrow();
+    });
+  });
+
+  /**
+   * Test language guidelines section (Requirements 7.1-7.6)
+   */
+  describe('Language Guidelines Section', () => {
+    let enriched;
+
+    beforeAll(() => {
+      const assessment = {
+        profile: { name: 'Test', email: 'test@test.com', userType: 'test', assessmentDate: '2026-01-01' },
+        scores: { speed: 75 },
+        rolesTop: []
+      };
+      enriched = enrichAssessmentData(assessment);
+    });
+
+    test('should include language guidelines section', () => {
+      expect(enriched).toContain('=== LANGUAGE GUIDELINES ===');
+      expect(enriched).toContain('LANGUAGE QUALITY GUIDELINES:');
+    });
+
+    test('should include forbidden vague terms (Requirement 7.1)', () => {
+      expect(enriched).toContain('1. FORBIDDEN VAGUE TERMS:');
+      expect(enriched).toContain('"quickly" / "slowly"');
+      expect(enriched).toContain('"adequate" / "sufficient"');
+      expect(enriched).toContain('"reasonable" / "appropriate"');
+      expect(enriched).toContain('"user-friendly" / "easy to use"');
+      expect(enriched).toContain('"efficient" / "effective"');
+      expect(enriched).toContain('"strategic" / "tactical"');
+    });
+
+    test('should include requirement for concrete, measurable descriptions (Requirement 7.2)', () => {
+      expect(enriched).toContain('2. USE CONCRETE, MEASURABLE DESCRIPTIONS:');
+      expect(enriched).toContain('Include specific timeframes');
+      expect(enriched).toContain('Include specific quantities');
+      expect(enriched).toContain('Include specific frequencies');
+      expect(enriched).toContain('observable, countable behaviors');
+    });
+
+    test('should include prohibition on ostentatious language (Requirement 7.3)', () => {
+      expect(enriched).toContain('3. AVOID OSTENTATIOUS OR UNNECESSARILY COMPLEX LANGUAGE:');
+      expect(enriched).toContain('DO NOT use unnecessarily complex vocabulary');
+      expect(enriched).toContain('DO NOT use jargon or technical terms when simpler words');
+      expect(enriched).toContain('DO use clear, direct language');
+    });
+
+    test('should include requirement for accessible language (Requirement 7.4)', () => {
+      expect(enriched).toContain('4. USE ACCESSIBLE, HUMAN-CENTERED LANGUAGE:');
+      expect(enriched).toContain('Write as if speaking to a colleague');
+      expect(enriched).toContain('Use active voice');
+      expect(enriched).toContain('conversational tone');
+      expect(enriched).toContain('Prioritize clarity');
+    });
+
+    test('should include examples of concrete vs vague language (Requirement 7.5)', () => {
+      expect(enriched).toContain('5. EXAMPLES OF CONCRETE VS VAGUE LANGUAGE:');
+      expect(enriched).toContain('VAGUE: "You work quickly and efficiently."');
+      expect(enriched).toContain('CONCRETE: "You make decisions within 24-48 hours');
+      expect(enriched).toContain('VAGUE: "You communicate effectively');
+      expect(enriched).toContain('CONCRETE: "You hold daily 15-minute stand-ups');
+    });
+
+    test('should include requirement for observable, specific descriptions (Requirement 7.6)', () => {
+      expect(enriched).toContain('6. ALL BEHAVIORAL DESCRIPTIONS MUST BE OBSERVABLE AND SPECIFIC:');
+      expect(enriched).toContain('Describe behaviors that could be seen, heard, or counted');
+      expect(enriched).toContain('Use action verbs that describe what someone does');
+      expect(enriched).toContain('Could someone observe and verify this behavior?');
+    });
+
+    test('should include examples of observable vs non-observable descriptions', () => {
+      expect(enriched).toContain('"You\'re thoughtful"');
+      expect(enriched).toContain('"You pause 5-10 seconds before responding');
+      expect(enriched).toContain('"You\'re confident"');
+      expect(enriched).toContain('"You present ideas to groups of 20+ without notes"');
     });
   });
 });

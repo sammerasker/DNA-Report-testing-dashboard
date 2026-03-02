@@ -30,10 +30,11 @@ export default function TestDNAReport() {
   // API configuration state
   const [provider, setProvider] = useState('openrouter');
   const [model, setModel] = useState('openrouter/free');
+  const [systemPrompt, setSystemPrompt] = useState('You are an expert entrepreneurial psychologist and career advisor with deep expertise in startup ecosystems, leadership development, and organizational psychology.');
   
   // UI state
   const [enrichmentEnabled, setEnrichmentEnabled] = useState(true);
-  const [architecture, setArchitecture] = useState('chunked'); // 'chunked', 'monolithic', 'comparison'
+  const [architecture, setArchitecture] = useState('monolithic'); // 'chunked', 'monolithic', 'comparison'
   const [batchDelay, setBatchDelay] = useState(5); // Default 5 seconds
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -110,6 +111,13 @@ export default function TestDNAReport() {
    */
   const handleModelChange = (newModel) => {
     setModel(newModel);
+  };
+  
+  /**
+   * Handle system prompt change
+   */
+  const handleSystemPromptChange = (newPrompt) => {
+    setSystemPrompt(newPrompt);
   };
   
   /**
@@ -231,7 +239,8 @@ export default function TestDNAReport() {
             const generator = createMonolithicGenerator(apiProvider);
             const result = await generator.generateReport(assessmentData, {
               maxTokens: 4000,
-              temperature: 0.7
+              temperature: 0.7,
+              systemPrompt: systemPrompt
             });
             return result;
           })()
@@ -374,7 +383,8 @@ export default function TestDNAReport() {
         
         const result = await generator.generateReport(assessmentData, {
           maxTokens: 4000,
-          temperature: 0.7
+          temperature: 0.7,
+          systemPrompt: systemPrompt
         });
         
         console.log(`[TestPage] Monolithic generation complete: ${result.status}`);
@@ -528,11 +538,13 @@ export default function TestDNAReport() {
               onGenerate={handleGenerate}
               onProviderChange={handleProviderChange}
               onModelChange={handleModelChange}
+              onSystemPromptChange={handleSystemPromptChange}
               onEnrichmentToggle={handleEnrichmentToggle}
               onArchitectureChange={handleArchitectureChange}
               onBatchDelayChange={handleBatchDelayChange}
               provider={provider}
               model={model}
+              systemPrompt={systemPrompt}
               enrichmentEnabled={enrichmentEnabled}
               architecture={architecture}
               batchDelay={batchDelay}

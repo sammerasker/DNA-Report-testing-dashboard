@@ -25,11 +25,18 @@ export default function EnrichedDataPanel({
   isEnrichmentEnabled = true 
 }) {
   const [expandedSections, setExpandedSections] = useState({
+    validationConstraints: false,
+    balancedFraming: false,
+    languageGuidelines: false,
+    userProfile: true,
     scoreInterpretations: true,
+    behavioralIndicators: true,
+    psychologicalFramework: true,
     domainMappings: true,
     traitInsights: true,
+    centralTensions: true,
     roleRationale: true,
-    centralTension: true
+    sectionRequirements: false
   });
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -39,11 +46,18 @@ export default function EnrichedDataPanel({
 
     const sections = {};
     const sectionHeaders = [
+      'VALIDATION CONSTRAINTS',
+      'BALANCED TRAIT FRAMING',
+      'LANGUAGE GUIDELINES',
+      'USER PROFILE',
       'SCORE INTERPRETATIONS',
+      'BEHAVIORAL INDICATORS',
+      'PSYCHOLOGICAL FRAMEWORK',
       'DOMAIN MAPPINGS',
       'TRAIT INSIGHTS',
+      'CENTRAL TENSIONS & SYNERGIES',
       'ROLE MATCH RATIONALE',
-      'CENTRAL TENSION'
+      'SECTION REQUIREMENTS'
     ];
 
     let currentSection = null;
@@ -53,18 +67,18 @@ export default function EnrichedDataPanel({
     
     for (const line of lines) {
       const trimmedLine = line.trim();
-      // Remove trailing colon for comparison
-      const lineWithoutColon = trimmedLine.replace(/:$/, '');
+      // Remove === markers and trailing colon for comparison
+      const cleanedLine = trimmedLine.replace(/^===\s*/, '').replace(/\s*===$/, '').replace(/:$/, '').trim();
       
-      // Check if line is a section header (with or without colon)
-      if (sectionHeaders.includes(lineWithoutColon)) {
+      // Check if line is a section header
+      if (sectionHeaders.includes(cleanedLine)) {
         // Save previous section
         if (currentSection) {
           sections[currentSection] = currentContent.join('\n').trim();
         }
         
-        // Start new section (use header without colon as key)
-        currentSection = lineWithoutColon;
+        // Start new section
+        currentSection = cleanedLine;
         currentContent = [];
       } else if (currentSection) {
         currentContent.push(line);
@@ -119,11 +133,18 @@ export default function EnrichedDataPanel({
 
   // Section key mapping
   const sectionKeyMap = {
+    'VALIDATION CONSTRAINTS': 'validationConstraints',
+    'BALANCED TRAIT FRAMING': 'balancedFraming',
+    'LANGUAGE GUIDELINES': 'languageGuidelines',
+    'USER PROFILE': 'userProfile',
     'SCORE INTERPRETATIONS': 'scoreInterpretations',
+    'BEHAVIORAL INDICATORS': 'behavioralIndicators',
+    'PSYCHOLOGICAL FRAMEWORK': 'psychologicalFramework',
     'DOMAIN MAPPINGS': 'domainMappings',
     'TRAIT INSIGHTS': 'traitInsights',
+    'CENTRAL TENSIONS & SYNERGIES': 'centralTensions',
     'ROLE MATCH RATIONALE': 'roleRationale',
-    'CENTRAL TENSION': 'centralTension'
+    'SECTION REQUIREMENTS': 'sectionRequirements'
   };
 
   if (!isEnrichmentEnabled) {

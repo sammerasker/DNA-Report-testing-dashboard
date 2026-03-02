@@ -40,11 +40,13 @@ export default function ControlPanel({
   onGenerate,
   onProviderChange,
   onModelChange,
+  onSystemPromptChange,
   onEnrichmentToggle,
   onArchitectureChange,
   onBatchDelayChange,
   provider = 'openrouter',
   model = '',
+  systemPrompt = '',
   enrichmentEnabled = true,
   architecture = 'chunked',
   batchDelay = 5,
@@ -136,6 +138,28 @@ export default function ControlPanel({
           ))}
         </select>
       </div>
+
+      {/* System Prompt Editor - Only show for monolithic mode */}
+      {(architecture === 'monolithic' || architecture === 'comparison') && (
+        <div className={styles.formGroup}>
+          <label htmlFor="systemPrompt" className={styles.label}>
+            System Prompt
+            <span className={styles.labelHint}> (for monolithic generation)</span>
+          </label>
+          <textarea
+            id="systemPrompt"
+            value={systemPrompt}
+            onChange={(e) => onSystemPromptChange(e.target.value)}
+            disabled={isGenerating}
+            className={styles.textarea}
+            rows={4}
+            placeholder="Enter system prompt for the AI..."
+          />
+          <p className={styles.helpText}>
+            Customize the AI's role and expertise. Default: Expert entrepreneurial psychologist.
+          </p>
+        </div>
+      )}
 
       {/* Enrichment Toggle */}
       <div className={styles.formGroup}>

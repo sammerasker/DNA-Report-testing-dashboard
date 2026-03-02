@@ -10,17 +10,17 @@
     "creativity": 90,
     "structure": 45,
     "planning": 50,
-    "detail": 42,
     "risk": 78,
-    "resilience": 75,
+    "stress": 75,
     "empathy": 65,
     "influence": 82,
-    "leadership": 80,
+    "visibility": 80,
     "mission": 88,
     "ambiguity": 82,
-    "learning": 70,
-    "collaboration": 68,
-    "autonomy": 85
+    "competition": 70,
+    "conflict": 68,
+    "trust": 85,
+    "expressiveness": 75
   },
   "rolesTop": [
     {
@@ -41,9 +41,11 @@
   ],
   "domains": {
     "cognitive_vision": ["speed", "abstraction", "creativity"],
-    "execution_discipline": ["structure", "planning", "detail"],
-    "social_influence": ["leadership", "influence", "empathy"],
-    "resilience_drive": ["resilience", "risk", "mission"]
+    "execution_operations": ["structure", "planning", "risk"],
+    "social_emotional": ["empathy", "conflict", "expressiveness", "trust"],
+    "motivation_drive": ["mission", "competition"],
+    "resilience_adaptability": ["stress", "ambiguity"],
+    "leadership_presence": ["visibility", "influence"]
   },
   "completedAt": "2026-02-27T10:30:00Z"
 }

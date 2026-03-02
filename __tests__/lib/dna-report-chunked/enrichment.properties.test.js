@@ -1,315 +1,288 @@
 /**
- * Property-Based Tests for Data Enrichment Layer
- * Uses fast-check for universal property validation
+ * Property-Based Tests for Enhanced Enrichment Layer
  * 
- * These tests verify that certain properties hold true for ALL possible inputs,
- * not just specific examples. Each test runs 100+ iterations with random data.
+ * These tests validate universal correctness properties across all valid inputs
+ * using fast-check library for property-based testing.
  */
 
-import { describe, test, expect } from '@jest/globals';
-import * as fc from 'fast-check';
+import fc from 'fast-check';
 import { enrichAssessmentData } from '../../../lib/dna-report-chunked/enrichment.js';
-import { TRAIT_GUIDE, DOMAIN_DEFINITIONS, SCORE_BANDS } from '../../../lib/dna-report-chunked/trait-definitions.js';
+import { TRAIT_GUIDE } from '../../../lib/dna-report-chunked/trait-definitions.js';
 
-/**
- * Arbitrary for generating valid trait scores (0-100)
- */
-const scoreArbitrary = fc.integer({ min: 0, max: 100 });
-
-/**
- * Arbitrary for generating assessment data with all traits
- */
-const fullAssessmentArbitrary = fc.record({
+// Helper: Generate valid assessment data
+const assessmentDataArbitrary = fc.record({
   profile: fc.record({
-    name: fc.string({ minLength: 1, maxLength: 50 }),
+    name: fc.string(),
     email: fc.emailAddress(),
-    userType: fc.constantFrom('entrepreneur-with-idea', 'startup', 'scaleup', 'enterprise'),
-    assessmentDate: fc.constantFrom('2024-01-15T10:30:00.000Z', '2025-06-20T14:45:00.000Z', '2026-02-10T09:15:00.000Z')
+    userType: fc.constantFrom('entrepreneur', 'employee', 'student'),
+    assessmentDate: fc.date({ min: new Date('2000-01-01'), max: new Date('2030-12-31') }).map(d => d.toISOString())
   }),
-  scores: fc.record({
-    speed: scoreArbitrary,
-    abstraction: scoreArbitrary,
-    creativity: scoreArbitrary,
-    structure: scoreArbitrary,
-    planning: scoreArbitrary,
-    risk: scoreArbitrary,
-    empathy: scoreArbitrary,
-    conflict: scoreArbitrary,
-    expressiveness: scoreArbitrary,
-    trust: scoreArbitrary,
-    mission: scoreArbitrary,
-    competition: scoreArbitrary,
-    stress: scoreArbitrary,
-    ambiguity: scoreArbitrary,
-    visibility: scoreArbitrary,
-    influence: scoreArbitrary
-  }),
+  scores: fc.record(
+    Object.keys(TRAIT_GUIDE).reduce((acc, key) => {
+      acc[key] = fc.integer({ min: 0, max: 100 });
+      return acc;
+    }, {})
+  ),
   rolesTop: fc.array(
     fc.record({
-      role: fc.string({ minLength: 5, maxLength: 30 }),
+      role: fc.string({ minLength: 1 }),
       score: fc.integer({ min: 0, max: 100 })
     }),
     { minLength: 0, maxLength: 5 }
   )
 });
 
-/**
- * Arbitrary for generating assessment data with missing fields
- */
-const partialAssessmentArbitrary = fc.record({
-  profile: fc.option(fc.record({
-    name: fc.option(fc.string({ minLength: 1, maxLength: 50 })),
-    email: fc.option(fc.emailAddress()),
-    userType: fc.option(fc.constantFrom('entrepreneur-with-idea', 'startup')),
-    assessmentDate: fc.option(fc.constantFrom('2024-01-15T10:30:00.000Z', '2025-06-20T14:45:00.000Z'))
-  })),
-  scores: fc.dictionary(
-    fc.constantFrom(...Object.keys(TRAIT_GUIDE)),
-    scoreArbitrary,
-    { minKeys: 0, maxKeys: 16 }
-  ),
-  rolesTop: fc.option(fc.array(
-    fc.record({
-      role: fc.string({ minLength: 5, maxLength: 30 }),
-      score: fc.integer({ min: 0, max: 100 })
-    }),
-    { minLength: 0, maxLength: 3 }
-  ))
-});
-
-describe('Data Enrichment Layer - Property Tests', () => {
+describe('Enhanced Enrichment Layer - Property-Based Tests', () => {
   
-  /**
-   * Property 1: Score Band Mapping Accuracy
-   * Validates: Requirements 1.2
-   * 
-   * For any score 0-100, the band classification must be correct (5-tier system)
-   */
-  test('Property 1: Score band mapping is always accurate', () => {
-    fc.assert(
-      fc.property(scoreArbitrary, (score) => {
-        let expectedBand;
-        if (score >= 85) expectedBand = 'High (Very High)';
-        else if (score >= 70) expectedBand = 'High';
-        else if (score >= 40) expectedBand = 'Mid';
-        else if (score >= 25) expectedBand = 'Low';
-        else expectedBand = 'Low (Very Low)';
-
-        // Create minimal assessment with this score
-        const assessment = {
-          profile: { name: 'Test', email: 'test@test.com', userType: 'test', assessmentDate: '2026-01-01' },
-          scores: { speed: score },
-          rolesTop: []
-        };
-
-        const enriched = enrichAssessmentData(assessment);
-        
-        // Check that the enriched output contains the correct band label
-        return enriched.includes(`Tempo & Bias for Action: ${score} (${expectedBand})`);
-      }),
-      { numRuns: 20 }
-    );
+  // Property 6: Valid Trait List in Enriched Context
+  describe('Property 6: Valid Trait List in Enriched Context', () => {
+    it('should include explicit list of all 16 valid trait keys', () => {
+      fc.assert(
+        fc.property(assessmentDataArbitrary, (assessmentData) => {
+          const enrichedContext = enrichAssessmentData(assessmentData);
+          
+          // Check that enriched context contains VALIDATION CONSTRAINTS section
+          expect(enrichedContext).toContain('=== VALIDATION CONSTRAINTS ===');
+          
+          // Check that all 16 trait keys are listed
+          const traitKeys = Object.keys(TRAIT_GUIDE);
+          expect(traitKeys).toHaveLength(16);
+          
+          traitKeys.forEach(traitKey => {
+            expect(enrichedContext).toContain(traitKey);
+          });
+          
+          // Check for explicit statement about valid traits
+          expect(enrichedContext).toMatch(/VALID TRAITS|valid trait/i);
+        }),
+        { numRuns: 100 }
+      );
+    });
   });
 
-  /**
-   * Property 2: Complete Domain Coverage
-   * Validates: Requirements 1.3
-   * 
-   * For any valid assessment, all 6 domains must be present in the output
-   */
-  test('Property 2: All domains are always present in enriched output', () => {
-    fc.assert(
-      fc.property(fullAssessmentArbitrary, (assessment) => {
-        const enriched = enrichAssessmentData(assessment);
-        
-        // Verify all 6 domain names appear in the output
-        const allDomainsPresent = Object.values(DOMAIN_DEFINITIONS).every(domain => 
-          enriched.includes(domain.displayName)
-        );
-        
-        return allDomainsPresent;
-      }),
-      { numRuns: 20 }
-    );
+  // Property 7: Valid Domain List in Enriched Context
+  describe('Property 7: Valid Domain List in Enriched Context', () => {
+    it('should include explicit list of all 6 valid domain keys', () => {
+      fc.assert(
+        fc.property(assessmentDataArbitrary, (assessmentData) => {
+          const enrichedContext = enrichAssessmentData(assessmentData);
+          
+          // Extract unique domains from TRAIT_GUIDE
+          const domains = new Set();
+          Object.values(TRAIT_GUIDE).forEach(trait => {
+            domains.add(trait.domain);
+          });
+          
+          expect(domains.size).toBe(6);
+          
+          // Check that all 6 domain keys are listed
+          domains.forEach(domain => {
+            expect(enrichedContext).toContain(domain);
+          });
+          
+          // Check for explicit statement about valid domains
+          expect(enrichedContext).toMatch(/VALID DOMAINS|valid domain/i);
+        }),
+        { numRuns: 100 }
+      );
+    });
   });
 
-  /**
-   * Property 3: Complete Trait Insights
-   * Validates: Requirements 1.4
-   * 
-   * For any valid assessment, exactly 16 trait insights must be generated
-   */
-  test('Property 3: Exactly 16 trait insights are always generated', () => {
-    fc.assert(
-      fc.property(fullAssessmentArbitrary, (assessment) => {
-        const enriched = enrichAssessmentData(assessment);
-        
-        // Count how many trait display names appear in the TRAIT INSIGHTS section
-        const insightsSection = enriched.split('=== TRAIT INSIGHTS ===')[1]?.split('===')[0] || '';
-        
-        const traitCount = Object.values(TRAIT_GUIDE).filter(trait => 
-          insightsSection.includes(trait.displayName)
-        ).length;
-        
-        return traitCount === 16;
-      }),
-      { numRuns: 20 }
-    );
+  // Property 8: Anti-Hallucination Prohibitions Present
+  describe('Property 8: Anti-Hallucination Prohibitions Present', () => {
+    it('should contain all prohibition statements', () => {
+      fc.assert(
+        fc.property(assessmentDataArbitrary, (assessmentData) => {
+          const enrichedContext = enrichAssessmentData(assessmentData);
+          
+          // Check for prohibition statements
+          const prohibitions = [
+            /DO NOT.*invent.*trait/i,
+            /DO NOT.*invent.*domain/i,
+            /DO NOT.*invent.*metric/i,
+            /DO NOT.*invent.*composite score/i
+          ];
+          
+          prohibitions.forEach(prohibition => {
+            expect(enrichedContext).toMatch(prohibition);
+          });
+        }),
+        { numRuns: 100 }
+      );
+    });
   });
 
-  /**
-   * Property 4: Role Rationale Completeness
-   * Validates: Requirements 1.5
-   * 
-   * N roles in input must produce exactly N rationales in output
-   */
-  test('Property 4: Number of role rationales matches number of input roles', () => {
-    fc.assert(
-      fc.property(fullAssessmentArbitrary, (assessment) => {
-        const enriched = enrichAssessmentData(assessment);
-        const inputRoleCount = assessment.rolesTop.length;
-        
-        if (inputRoleCount === 0) {
-          // If no roles, should not have ROLE MATCH RATIONALE section
-          return !enriched.includes('=== ROLE MATCH RATIONALE ===');
-        }
-        
-        // Count numbered role entries in the output
-        const rationaleSection = enriched.split('=== ROLE MATCH RATIONALE ===')[1]?.split('===')[0] || '';
-        const rationaleCount = (rationaleSection.match(/^\d+\./gm) || []).length;
-        
-        return rationaleCount === inputRoleCount;
-      }),
-      { numRuns: 20 }
-    );
+  // Property 9: Valid Role List When Roles Present
+  describe('Property 9: Valid Role List When Roles Present', () => {
+    it('should include explicit role list and prohibition when roles present', () => {
+      const assessmentWithRoles = fc.record({
+        profile: fc.record({
+          name: fc.string(),
+          email: fc.emailAddress()
+        }),
+        scores: fc.record(
+          Object.keys(TRAIT_GUIDE).reduce((acc, key) => {
+            acc[key] = fc.integer({ min: 0, max: 100 });
+            return acc;
+          }, {})
+        ),
+        rolesTop: fc.array(
+          fc.record({
+            role: fc.string({ minLength: 1 }),
+            score: fc.integer({ min: 0, max: 100 })
+          }),
+          { minLength: 1, maxLength: 5 }
+        )
+      });
+
+      fc.assert(
+        fc.property(assessmentWithRoles, (assessmentData) => {
+          const enrichedContext = enrichAssessmentData(assessmentData);
+          
+          // Check that all role names are present
+          assessmentData.rolesTop.forEach(roleData => {
+            expect(enrichedContext).toContain(roleData.role);
+          });
+          
+          // Check for role prohibition statement
+          expect(enrichedContext).toMatch(/DO NOT.*invent.*role/i);
+        }),
+        { numRuns: 100 }
+      );
+    });
   });
 
-  /**
-   * Property 5: Enriched Context Structure
-   * Validates: Requirements 1.6
-   * 
-   * All required section headers must be present in the output
-   */
-  test('Property 5: All required section headers are always present', () => {
-    fc.assert(
-      fc.property(fullAssessmentArbitrary, (assessment) => {
-        const enriched = enrichAssessmentData(assessment);
-        
-        const requiredHeaders = [
-          '=== USER PROFILE ===',
-          '=== SCORE INTERPRETATIONS ===',
-          '=== DOMAIN MAPPINGS ===',
-          '=== TRAIT INSIGHTS ==='
-        ];
-        
-        return requiredHeaders.every(header => enriched.includes(header));
-      }),
-      { numRuns: 20 }
-    );
+  // Property 10: Role Prohibition When Roles Absent
+  describe('Property 10: Role Prohibition When Roles Absent', () => {
+    it('should include role prohibition when roles absent', () => {
+      const assessmentWithoutRoles = fc.record({
+        profile: fc.record({
+          name: fc.string(),
+          email: fc.emailAddress()
+        }),
+        scores: fc.record(
+          Object.keys(TRAIT_GUIDE).reduce((acc, key) => {
+            acc[key] = fc.integer({ min: 0, max: 100 });
+            return acc;
+          }, {})
+        ),
+        rolesTop: fc.constant([])
+      });
+
+      fc.assert(
+        fc.property(assessmentWithoutRoles, (assessmentData) => {
+          const enrichedContext = enrichAssessmentData(assessmentData);
+          
+          // Check for prohibition statement when no roles
+          expect(enrichedContext).toMatch(/DO NOT.*reference.*role|NO role data/i);
+        }),
+        { numRuns: 100 }
+      );
+    });
   });
 
-  /**
-   * Property 6: Graceful Handling of Missing Fields
-   * Validates: Requirements 1.8
-   * 
-   * Function must never throw errors, even with incomplete data
-   */
-  test('Property 6: No errors thrown with missing or incomplete fields', () => {
-    fc.assert(
-      fc.property(partialAssessmentArbitrary, (assessment) => {
-        try {
-          const enriched = enrichAssessmentData(assessment);
-          // Should produce some output
-          return typeof enriched === 'string' && enriched.length > 0;
-        } catch (error) {
-          // Any error means the property failed
-          return false;
-        }
-      }),
-      { numRuns: 20 }
-    );
+  // Property 11: Role Name Validation
+  describe('Property 11: Role Name Validation', () => {
+    it('should match role names exactly from rolesTop', () => {
+      fc.assert(
+        fc.property(assessmentDataArbitrary, (assessmentData) => {
+          const enrichedContext = enrichAssessmentData(assessmentData);
+          
+          if (assessmentData.rolesTop && assessmentData.rolesTop.length > 0) {
+            // All role names should appear in enriched context
+            assessmentData.rolesTop.forEach(roleData => {
+              expect(enrichedContext).toContain(roleData.role);
+            });
+          }
+        }),
+        { numRuns: 100 }
+      );
+    });
   });
 
-  /**
-   * Property 7: Missing Traits Marked as Not Assessed
-   * Validates: Requirements 1.8 (graceful degradation)
-   * 
-   * Traits without scores should be marked "Not Assessed" or "N/A"
-   */
-  test('Property 7: Missing traits are marked as Not Assessed', () => {
-    fc.assert(
-      fc.property(partialAssessmentArbitrary, (assessment) => {
-        const enriched = enrichAssessmentData(assessment);
-        const providedTraits = Object.keys(assessment.scores || {});
-        const allTraits = Object.keys(TRAIT_GUIDE);
-        const missingTraits = allTraits.filter(t => !providedTraits.includes(t));
-        
-        if (missingTraits.length === 0) return true; // All traits provided
-        
-        // Check that at least one missing trait is marked as N/A or Not Assessed
-        return missingTraits.some(traitKey => {
-          const trait = TRAIT_GUIDE[traitKey];
-          return enriched.includes(`${trait.displayName}: N/A`) || 
-                 enriched.includes('Not Assessed');
-        });
-      }),
-      { numRuns: 20 }
-    );
+  // Property 12: Balanced Framing Guidance Present
+  describe('Property 12: Balanced Framing Guidance Present', () => {
+    it('should contain all balanced framing guidance statements', () => {
+      fc.assert(
+        fc.property(assessmentDataArbitrary, (assessmentData) => {
+          const enrichedContext = enrichAssessmentData(assessmentData);
+          
+          // Check for balanced framing section
+          expect(enrichedContext).toContain('=== BALANCED TRAIT FRAMING ===');
+          
+          // Check for key guidance statements
+          const guidanceStatements = [
+            /40-69.*balanced|balanced.*40-69/i,
+            /extreme.*inflexible|inflexible.*extreme/i,
+            /both poles.*strength|strength.*both poles/i,
+            /no value judgment|avoid.*judgment/i,
+            /context.*optimal|optimal.*context/i
+          ];
+          
+          guidanceStatements.forEach(statement => {
+            expect(enrichedContext).toMatch(statement);
+          });
+        }),
+        { numRuns: 100 }
+      );
+    });
   });
 
-  /**
-   * Property 8: Output is Always Non-Empty String
-   * Validates: Basic correctness
-   * 
-   * Function must always return a non-empty string
-   */
-  test('Property 8: Output is always a non-empty string', () => {
-    fc.assert(
-      fc.property(partialAssessmentArbitrary, (assessment) => {
-        const enriched = enrichAssessmentData(assessment);
-        return typeof enriched === 'string' && enriched.length > 100; // Reasonable minimum
-      }),
-      { numRuns: 20 }
-    );
+  // Property 15: Language Guidelines Present
+  describe('Property 15: Language Guidelines Present', () => {
+    it('should contain all language guideline statements', () => {
+      fc.assert(
+        fc.property(assessmentDataArbitrary, (assessmentData) => {
+          const enrichedContext = enrichAssessmentData(assessmentData);
+          
+          // Check for language guidelines section
+          expect(enrichedContext).toContain('=== LANGUAGE GUIDELINES ===');
+          
+          // Check for key guideline statements
+          const guidelines = [
+            /forbidden.*vague|avoid.*vague/i,
+            /concrete.*measurable|measurable.*concrete/i,
+            /ostentatious|unnecessarily complex/i,
+            /accessible.*language|human-centered/i,
+            /observable.*specific|specific.*observable/i
+          ];
+          
+          guidelines.forEach(guideline => {
+            expect(enrichedContext).toMatch(guideline);
+          });
+        }),
+        { numRuns: 100 }
+      );
+    });
   });
 
-  /**
-   * Property 9: Profile Information Preserved
-   * Validates: Requirements 1.1 (data transformation)
-   * 
-   * User profile information must appear in the output
-   */
-  test('Property 9: Profile information is preserved in output', () => {
-    fc.assert(
-      fc.property(fullAssessmentArbitrary, (assessment) => {
-        const enriched = enrichAssessmentData(assessment);
-        
-        // Check that profile name appears in output
-        return enriched.includes(`Name: ${assessment.profile.name}`);
-      }),
-      { numRuns: 20 }
-    );
+  // Property 5: Behavioral Indicators in Enriched Context
+  describe('Property 5: Behavioral Indicators in Enriched Context', () => {
+    it('should include behavioral indicators for assessed traits', () => {
+      fc.assert(
+        fc.property(assessmentDataArbitrary, (assessmentData) => {
+          const enrichedContext = enrichAssessmentData(assessmentData);
+          
+          // Check for behavioral indicators section
+          expect(enrichedContext).toContain('=== BEHAVIORAL INDICATORS ===');
+          
+          // For each assessed trait, check that behavioral indicators are present
+          Object.entries(assessmentData.scores).forEach(([traitKey, score]) => {
+            if (score !== undefined && score !== null) {
+              const trait = TRAIT_GUIDE[traitKey];
+              if (trait && trait.behavioralIndicators && trait.behavioralIndicators.length > 0) {
+                // Check that trait name appears in behavioral indicators section
+                const behavioralSection = enrichedContext.split('=== BEHAVIORAL INDICATORS ===')[1];
+                if (behavioralSection) {
+                  expect(behavioralSection).toContain(trait.displayName);
+                }
+              }
+            }
+          });
+        }),
+        { numRuns: 100 }
+      );
+    });
   });
 
-  /**
-   * Property 10: Score Values Preserved
-   * Validates: Requirements 1.2 (score interpretation)
-   * 
-   * Original score values must appear in the output
-   */
-  test('Property 10: Score values are preserved in output', () => {
-    fc.assert(
-      fc.property(fullAssessmentArbitrary, (assessment) => {
-        const enriched = enrichAssessmentData(assessment);
-        
-        // Check that at least one score value appears
-        const someScorePresent = Object.values(assessment.scores).some(score => 
-          enriched.includes(`: ${score} (`)
-        );
-        
-        return someScorePresent;
-      }),
-      { numRuns: 20 }
-    );
-  });
 });
