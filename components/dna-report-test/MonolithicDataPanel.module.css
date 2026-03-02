@@ -1,0 +1,128 @@
+/* MonolithicDataPanel.module.css */
+
+.panel {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.inactiveLabel {
+  font-size: 0.875rem;
+  color: #999;
+  font-style: italic;
+}
+
+.inactiveMessage {
+  padding: 2rem;
+  text-align: center;
+  color: #666;
+  background: #f9f9f9;
+  border-radius: 4px;
+  border: 1px dashed #ddd;
+}
+
+.inactiveMessage p {
+  margin: 0;
+}
+
+.stats {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.stat {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.stat strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.copyButton {
+  margin-left: auto;
+  padding: 0.5rem 1rem;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.copyButton:hover {
+  background: #45a049;
+}
+
+.copyButton:active {
+  transform: scale(0.98);
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.textarea {
+  flex: 1;
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: none;
+  background: #fafafa;
+  color: #333;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #2196f3;
+  background: white;
+}
+
+.helpText {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #e3f2fd;
+  border-left: 3px solid #2196f3;
+  border-radius: 4px;
+}
+
+.helpText p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #1976d2;
+}

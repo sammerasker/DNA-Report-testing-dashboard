@@ -1,51 +1,50 @@
 {
   "profile": {
     "name": "Marion Anderson",
-    "email": "marion.anderson@example.com",
-    "userType": "Visionary Entrepreneur"
+    "email": "marion@example.com",
+    "userType": ["entrepreneur-with-idea", "startup"]
   },
   "normalizedScores": {
     "speed": 85,
     "abstraction": 72,
     "creativity": 90,
     "structure": 45,
-    "planning": 50,
+    "planning": 52,
     "risk": 78,
-    "stress": 75,
     "empathy": 65,
-    "influence": 82,
-    "visibility": 80,
+    "expressiveness": 82,
+    "conflict": 55,
+    "trust": 70,
     "mission": 88,
-    "ambiguity": 82,
-    "competition": 70,
-    "conflict": 68,
-    "trust": 85,
-    "expressiveness": 75
+    "competition": 62,
+    "stress": 40,
+    "ambiguity": 75,
+    "visibility": 80,
+    "influence": 82
   },
   "rolesTop": [
     {
-      "role": "Product-Led Founder",
-      "score": 94,
-      "rationale": "Strong vision and creativity combined with high influence make this an ideal role"
+      "role": "CEO",
+      "score": 94
     },
     {
-      "role": "Visionary CEO",
-      "score": 88,
-      "rationale": "High abstraction and mission alignment suit strategic leadership"
+      "role": "CPO",
+      "score": 88
     },
     {
-      "role": "Innovation Director",
-      "score": 85,
-      "rationale": "Exceptional creativity and pattern recognition drive innovation"
+      "role": "CMO",
+      "score": 82
     }
   ],
-  "domains": {
-    "cognitive_vision": ["speed", "abstraction", "creativity"],
-    "execution_operations": ["structure", "planning", "risk"],
-    "social_emotional": ["empathy", "conflict", "expressiveness", "trust"],
-    "motivation_drive": ["mission", "competition"],
-    "resilience_adaptability": ["stress", "ambiguity"],
-    "leadership_presence": ["visibility", "influence"]
-  },
-  "completedAt": "2026-02-27T10:30:00Z"
+  "domains": [
+    {
+      "title": "Cognitive & Vision",
+      "traits": ["speed", "abstraction", "creativity"]
+    },
+    {
+      "title": "Execution & Operations",
+      "traits": ["structure", "planning", "risk"]
+    }
+  ],
+  "completedAt": "2026-03-02T16:54:14Z"
 }

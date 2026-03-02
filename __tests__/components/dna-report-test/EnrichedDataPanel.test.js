@@ -42,8 +42,8 @@ Vision-execution gap analysis`;
 
   test('renders toolbar buttons when context is available', () => {
     render(<EnrichedDataPanel enrichedContext={mockEnrichedContext} isEnrichmentEnabled={true} />);
-    // Button shows "Collapse All" when sections are present (default expanded state)
-    expect(screen.getByText(/Collapse All/i)).toBeInTheDocument();
+    // Button shows "Expand All" initially (some sections start collapsed)
+    expect(screen.getByText(/Expand All/i)).toBeInTheDocument();
     expect(screen.getByText(/Copy/i)).toBeInTheDocument();
   });
 
@@ -60,7 +60,7 @@ Vision-execution gap analysis`;
     expect(screen.getByText('DOMAIN MAPPINGS')).toBeInTheDocument();
     expect(screen.getByText('TRAIT INSIGHTS')).toBeInTheDocument();
     expect(screen.getByText('ROLE MATCH RATIONALE')).toBeInTheDocument();
-    expect(screen.getByText('CENTRAL TENSION')).toBeInTheDocument();
+    // CENTRAL TENSION is now part of ROLE MATCH RATIONALE content, not a separate section
   });
 
   test('toggles section expansion when clicked', () => {
@@ -81,12 +81,12 @@ Vision-execution gap analysis`;
   test('expand all button toggles all sections', () => {
     render(<EnrichedDataPanel enrichedContext={mockEnrichedContext} isEnrichmentEnabled={true} />);
     
-    const expandAllButton = screen.getByText(/Collapse All/i);
+    const expandAllButton = screen.getByText(/Expand All/i);
     
-    // Click to collapse all
+    // Click to expand all
     fireEvent.click(expandAllButton);
     
-    // Button text should change
-    expect(screen.getByText(/Expand All/i)).toBeInTheDocument();
+    // Button text should change to Collapse All
+    expect(screen.getByText(/Collapse All/i)).toBeInTheDocument();
   });
 });

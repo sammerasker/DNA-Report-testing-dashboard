@@ -42,12 +42,14 @@ export default function ControlPanel({
   onModelChange,
   onSystemPromptChange,
   onEnrichmentToggle,
+  onMonolithicEnrichmentToggle,
   onArchitectureChange,
   onBatchDelayChange,
   provider = 'openrouter',
   model = '',
   systemPrompt = '',
   enrichmentEnabled = true,
+  monolithicEnrichmentEnabled = false,
   architecture = 'chunked',
   batchDelay = 5,
   status = 'idle',
@@ -58,11 +60,12 @@ export default function ControlPanel({
 }) {
   // Model options based on provider
   const modelOptions = {
-    openrouter: [
-      { value: 'openrouter/free', label: 'OpenRouter Free' },
-      { value: 'meta-llama/llama-3.1-8b-instruct:free', label: 'Llama 3.1 8B Instruct (Free)' },
-      { value: 'google/gemma-2-9b-it:free', label: 'Gemma 2 9B IT (Free)' }
-    ],
+    // OpenRouter - Temporarily disabled due to timeout issues
+    // openrouter: [
+    //   { value: 'openrouter/free', label: 'OpenRouter Free' },
+    //   { value: 'meta-llama/llama-3.1-8b-instruct:free', label: 'Llama 3.1 8B Instruct (Free)' },
+    //   { value: 'google/gemma-2-9b-it:free', label: 'Gemma 2 9B IT (Free)' }
+    // ],
     huggingface: [
       { value: 'openai/gpt-oss-20b', label: 'GPT-OSS-20B (Default)' },
       { value: 'meta-llama/Llama-3.2-3B-Instruct', label: 'Llama 3.2 3B Instruct' },
@@ -70,9 +73,9 @@ export default function ControlPanel({
       { value: 'google/flan-t5-xxl', label: 'FLAN-T5 XXL' }
     ],
     moonshot: [
-      { value: 'moonshot-v1-8k', label: 'Moonshot v1 8K (Default)' },
-      { value: 'moonshot-v1-32k', label: 'Moonshot v1 32K' },
-      { value: 'moonshot-v1-128k', label: 'Moonshot v1 128K' }
+      { value: 'moonshot-v1-128k', label: 'Moonshot v1 128K (Default)' },
+      { value: 'moonshot-v1-8k', label: 'Moonshot v1 8K' },
+      { value: 'moonshot-v1-32k', label: 'Moonshot v1 32K' }
     ]
   };
 
@@ -113,7 +116,7 @@ export default function ControlPanel({
           disabled={isGenerating}
           className={styles.select}
         >
-          <option value="openrouter">OpenRouter</option>
+          {/* <option value="openrouter">OpenRouter</option> */}
           <option value="huggingface">Hugging Face</option>
           <option value="moonshot">Moonshot</option>
         </select>
@@ -139,27 +142,33 @@ export default function ControlPanel({
         </select>
       </div>
 
-      {/* System Prompt Editor - Only show for monolithic mode */}
-      {(architecture === 'monolithic' || architecture === 'comparison') && (
-        <div className={styles.formGroup}>
-          <label htmlFor="systemPrompt" className={styles.label}>
-            System Prompt
+      {/* System Prompt Editor - Show for all modes */}
+      <div className={styles.formGroup}>
+        <label htmlFor="systemPrompt" className={styles.label}>
+          System Prompt
+          {architecture === 'chunked' && (
+            <span className={styles.labelHint}> (for chunked generation)</span>
+          )}
+          {architecture === 'monolithic' && (
             <span className={styles.labelHint}> (for monolithic generation)</span>
-          </label>
-          <textarea
-            id="systemPrompt"
-            value={systemPrompt}
-            onChange={(e) => onSystemPromptChange(e.target.value)}
-            disabled={isGenerating}
-            className={styles.textarea}
-            rows={4}
-            placeholder="Enter system prompt for the AI..."
-          />
-          <p className={styles.helpText}>
-            Customize the AI's role and expertise. Default: Expert entrepreneurial psychologist.
-          </p>
-        </div>
-      )}
+          )}
+          {architecture === 'comparison' && (
+            <span className={styles.labelHint}> (for both architectures)</span>
+          )}
+        </label>
+        <textarea
+          id="systemPrompt"
+          value={systemPrompt}
+          onChange={(e) => onSystemPromptChange(e.target.value)}
+          disabled={isGenerating}
+          className={styles.textarea}
+          rows={4}
+          placeholder="Enter system prompt for the AI..."
+        />
+        <p className={styles.helpText}>
+          Customize the AI&apos;s role and expertise. Default: Expert entrepreneurial psychologist.
+        </p>
+      </div>
 
       {/* Enrichment Toggle */}
       <div className={styles.formGroup}>
@@ -172,15 +181,38 @@ export default function ControlPanel({
             className={styles.checkbox}
           />
           <span className={styles.toggleText}>
-            Enable Data Enrichment
+            Enable Data Enrichment (Chunked Mode)
           </span>
         </label>
         <p className={styles.helpText}>
           {enrichmentEnabled 
-            ? 'Using enriched context with interpretations' 
-            : 'Using raw JSON assessment data'}
+            ? 'Using enriched context with interpretations for chunked generation' 
+            : 'Using raw JSON assessment data for chunked generation'}
         </p>
       </div>
+
+      {/* Monolithic Enrichment Toggle - Only show for monolithic/comparison modes */}
+      {(architecture === 'monolithic' || architecture === 'comparison') && (
+        <div className={styles.formGroup}>
+          <label className={styles.toggleLabel}>
+            <input
+              type="checkbox"
+              checked={monolithicEnrichmentEnabled}
+              onChange={(e) => onMonolithicEnrichmentToggle(e.target.checked)}
+              disabled={isGenerating}
+              className={styles.checkbox}
+            />
+            <span className={styles.toggleText}>
+              Use Enriched Context for Monolithic
+            </span>
+          </label>
+          <p className={styles.helpText}>
+            {monolithicEnrichmentEnabled 
+              ? '📚 Using detailed enriched context (12 sections, ~6000 tokens)' 
+              : '📄 Using simple raw data prompt (~500 tokens)'}
+          </p>
+        </div>
+      )}
 
       {/* Architecture Selection */}
       <div className={styles.formGroup}>
@@ -205,7 +237,7 @@ export default function ControlPanel({
         </p>
         {architecture === 'comparison' && (
           <div className={styles.infoBox}>
-            <strong>📊 What you'll see:</strong>
+            <strong>📊 What you&apos;ll see:</strong>
             <ul className={styles.infoList}>
               <li>Side-by-side report comparison</li>
               <li>Quality metrics for both approaches</li>

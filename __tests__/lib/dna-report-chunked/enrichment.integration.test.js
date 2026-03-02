@@ -157,6 +157,12 @@ describe('Enhanced Enrichment Layer - End-to-End Integration', () => {
       // Validate the enriched context
       const validationResult = validateEnrichedContext(sampleAssessmentData, enrichedContext);
       
+      // Debug: log validation errors if any
+      if (!validationResult.valid) {
+        console.log('Validation errors:', validationResult.errors);
+        console.log('Enriched context length:', enrichedContext.length);
+      }
+      
       // Should pass validation
       expect(validationResult.valid).toBe(true);
       expect(validationResult.errors).toHaveLength(0);
@@ -230,15 +236,16 @@ describe('Enhanced Enrichment Layer - End-to-End Integration', () => {
     it('should detect missing sections in corrupted enriched context', () => {
       let enrichedContext = enrichAssessmentData(sampleAssessmentData);
       
-      // Corrupt the enriched context by removing a section
-      enrichedContext = enrichedContext.replace('=== TRAIT INSIGHTS ===', '');
+      // Corrupt the enriched context by removing the BEHAVIORAL INDICATORS section
+      enrichedContext = enrichedContext.replace(/=== BEHAVIORAL INDICATORS ===[\s\S]*?===/g, '===');
       
       // Validate
       const validationResult = validateEnrichedContext(sampleAssessmentData, enrichedContext);
       
-      // Should fail validation
+      // Should fail validation (missing BEHAVIORAL INDICATORS section)
       expect(validationResult.valid).toBe(false);
       expect(validationResult.errors.length).toBeGreaterThan(0);
+      expect(validationResult.errors.some(e => e.includes('BEHAVIORAL INDICATORS'))).toBe(true);
     });
 
     it('should detect missing behavioral indicators', () => {

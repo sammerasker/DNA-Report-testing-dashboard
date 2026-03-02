@@ -15,12 +15,13 @@ import styles from './LimitsCounter.module.css';
  * Provider limits configuration (free tier)
  */
 const PROVIDER_LIMITS = {
-  openrouter: {
-    name: 'OpenRouter',
-    daily: 50,
-    weekly: 350,  // 50 * 7
-    monthly: 1500 // 50 * 30
-  },
+  // OpenRouter - Temporarily hidden (commented out)
+  // openrouter: {
+  //   name: 'OpenRouter',
+  //   daily: 50,
+  //   weekly: 350,  // 50 * 7
+  //   monthly: 1500 // 50 * 30
+  // },
   huggingface: {
     name: 'Hugging Face',
     daily: 1000,
@@ -176,6 +177,7 @@ export default function LimitsCounter({ currentProvider = 'openrouter', requests
         saveUsageData(newData);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestsUsed]);
 
   // Calculate percentage for progress bar

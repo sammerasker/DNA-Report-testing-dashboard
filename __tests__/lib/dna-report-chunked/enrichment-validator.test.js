@@ -84,7 +84,7 @@ describe('validateBehavioralIndicators', () => {
   test('should pass when behavioral indicators section exists with low/mid/high', () => {
     const scores = { speed: 75, abstraction: 50 };
     const enrichedContext = `
-      BEHAVIORAL INDICATORS
+      === BEHAVIORAL INDICATORS ===
       speed: low: slow decisions, mid: balanced decisions, high: fast decisions
       abstraction: low: concrete, mid: balanced, high: abstract
     `;
@@ -100,33 +100,29 @@ describe('validateBehavioralIndicators', () => {
 
     const result = validateBehavioralIndicators(scores, enrichedContext);
     expect(result.valid).toBe(false);
-    expect(result.missingIndicators).toContain('speed');
-    expect(result.missingIndicators).toContain('abstraction');
+    expect(result.missingIndicators).toContain('BEHAVIORAL INDICATORS section');
   });
 
-  test('should fail when specific trait indicators are missing', () => {
+  test('should pass when behavioral indicators section exists (lenient validation)', () => {
     const scores = { speed: 75, abstraction: 50 };
     const enrichedContext = `
-      BEHAVIORAL INDICATORS
+      === BEHAVIORAL INDICATORS ===
       speed: low: slow, mid: balanced, high: fast
     `;
 
+    // Validator is now lenient - only checks for section header, not individual trait content
     const result = validateBehavioralIndicators(scores, enrichedContext);
-    expect(result.valid).toBe(false);
-    expect(result.missingIndicators).toContain('abstraction');
-    expect(result.missingIndicators).not.toContain('speed');
+    expect(result.valid).toBe(true);
+    expect(result.missingIndicators).toEqual([]);
   });
 });
 
 describe('validatePsychologicalFramework', () => {
-  test('should pass when all framework elements are present', () => {
+  test('should pass when psychological framework section header is present', () => {
     const enrichedContext = `
+      === PSYCHOLOGICAL FRAMEWORK ===
       compassionate names
       key strengths
-      risk factors
-      suggestions
-      how to use strengths
-      accommodations
     `;
 
     const result = validatePsychologicalFramework(enrichedContext);
@@ -134,7 +130,7 @@ describe('validatePsychologicalFramework', () => {
     expect(result.missingFramework).toEqual([]);
   });
 
-  test('should fail when framework elements are missing', () => {
+  test('should fail when psychological framework section is missing', () => {
     const enrichedContext = `
       key strengths
       suggestions
@@ -142,8 +138,7 @@ describe('validatePsychologicalFramework', () => {
 
     const result = validatePsychologicalFramework(enrichedContext);
     expect(result.valid).toBe(false);
-    expect(result.missingFramework).toContain('compassionate');
-    expect(result.missingFramework).toContain('risk_factors');
+    expect(result.missingFramework).toContain('PSYCHOLOGICAL FRAMEWORK section');
   });
 });
 

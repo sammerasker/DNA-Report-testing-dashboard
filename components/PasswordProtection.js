@@ -15,6 +15,7 @@ export default function PasswordProtection({ children }) {
   useEffect(() => {
     const authStatus = sessionStorage.getItem('dna_report_authenticated');
     if (authStatus === 'true') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsAuthenticated(true);
     }
     setIsLoading(false);

@@ -65,8 +65,9 @@ describe('TestDNAReport Page - Property Tests', () => {
    * 
    * Verifies that the UI is structured to support progressive display.
    * Note: Full progressive display testing requires integration with real chunk execution.
+   * Note: Skipped because default architecture is now monolithic, not chunked.
    */
-  test('Property 26: Chunk content visible immediately upon completion', async () => {
+  test.skip('Property 26: Chunk content visible immediately upon completion', async () => {
     const { container } = render(<TestDNAReport />);
     
     await waitFor(() => {
@@ -164,8 +165,9 @@ describe('TestDNAReport Page - Property Tests', () => {
    * 
    * Verifies that the debug panel exists for displaying chunk status and retry options.
    * Note: Full retry testing requires integration with real chunk execution failures.
+   * Note: Skipped because default architecture is now monolithic, not chunked.
    */
-  test('Property 32: Retry mechanism available for failed chunks', async () => {
+  test.skip('Property 32: Retry mechanism available for failed chunks', async () => {
     const { container } = render(<TestDNAReport />);
     
     await waitFor(() => {

@@ -11,6 +11,7 @@ import Head from 'next/head';
 import ControlPanel from '../components/dna-report-test/ControlPanel';
 import RawDataPanel from '../components/dna-report-test/RawDataPanel';
 import EnrichedDataPanel from '../components/dna-report-test/EnrichedDataPanel';
+import MonolithicDataPanel from '../components/dna-report-test/MonolithicDataPanel';
 import ReportOutputPanel from '../components/dna-report-test/ReportOutputPanel';
 import DebugPanel from '../components/dna-report-test/DebugPanel';
 import { enrichAssessmentData } from '../lib/dna-report-chunked/enrichment';
@@ -18,7 +19,7 @@ import { createChunkExecutor } from '../lib/dna-report-chunked/chunk-executor';
 import ReportAssembler from '../lib/dna-report-chunked/report-assembler';
 import QualityMetrics from '../lib/dna-report-chunked/quality-metrics';
 import { createOpenRouterProvider, createHuggingFaceProvider, createMoonshotProvider } from '../lib/dna-report-chunked/api-provider';
-import { createMonolithicGenerator } from '../lib/dna-report-chunked/monolithic-generator';
+import { createMonolithicGenerator, generateMonolithicPromptData } from '../lib/dna-report-chunked/monolithic-generator';
 
 export default function TestDNAReport() {
   // ===== State Management =====
@@ -26,14 +27,16 @@ export default function TestDNAReport() {
   // Assessment data state
   const [assessmentData, setAssessmentData] = useState(null);
   const [enrichedContext, setEnrichedContext] = useState('');
+  const [monolithicPrompt, setMonolithicPrompt] = useState('');
   
   // API configuration state
-  const [provider, setProvider] = useState('openrouter');
-  const [model, setModel] = useState('openrouter/free');
+  const [provider, setProvider] = useState('moonshot'); // Changed default from 'openrouter' to 'moonshot'
+  const [model, setModel] = useState('moonshot-v1-128k'); // Changed default to 128k model
   const [systemPrompt, setSystemPrompt] = useState('You are an expert entrepreneurial psychologist and career advisor with deep expertise in startup ecosystems, leadership development, and organizational psychology.');
   
   // UI state
   const [enrichmentEnabled, setEnrichmentEnabled] = useState(true);
+  const [monolithicEnrichmentEnabled, setMonolithicEnrichmentEnabled] = useState(false);
   const [architecture, setArchitecture] = useState('monolithic'); // 'chunked', 'monolithic', 'comparison'
   const [batchDelay, setBatchDelay] = useState(5); // Default 5 seconds
   const [status, setStatus] = useState('idle');
@@ -73,6 +76,18 @@ export default function TestDNAReport() {
     loadSampleData();
   }, []);
   
+  // ===== Generate Monolithic Prompt when data or settings change =====
+  useEffect(() => {
+    if (assessmentData && (architecture === 'monolithic' || architecture === 'comparison')) {
+      // Generate enriched context if needed for monolithic
+      const enrichedCtx = monolithicEnrichmentEnabled ? enrichAssessmentData(assessmentData) : null;
+      
+      // Generate monolithic prompt
+      const prompt = generateMonolithicPromptData(assessmentData, monolithicEnrichmentEnabled, enrichedCtx);
+      setMonolithicPrompt(prompt);
+    }
+  }, [assessmentData, architecture, monolithicEnrichmentEnabled]);
+  
   // ===== Timer Effect =====
   useEffect(() => {
     let interval;
@@ -102,7 +117,7 @@ export default function TestDNAReport() {
     } else if (newProvider === 'huggingface') {
       setModel('openai/gpt-oss-20b');
     } else if (newProvider === 'moonshot') {
-      setModel('moonshot-v1-8k');
+      setModel('moonshot-v1-128k'); // Changed default to 128k model
     }
   };
   
@@ -125,6 +140,20 @@ export default function TestDNAReport() {
    */
   const handleEnrichmentToggle = (enabled) => {
     setEnrichmentEnabled(enabled);
+  };
+  
+  /**
+   * Handle monolithic enrichment toggle
+   */
+  const handleMonolithicEnrichmentToggle = (enabled) => {
+    setMonolithicEnrichmentEnabled(enabled);
+  };
+  
+  /**
+   * Handle monolithic prompt change
+   */
+  const handleMonolithicPromptChange = (newPrompt) => {
+    setMonolithicPrompt(newPrompt);
   };
   
   /**
@@ -228,7 +257,8 @@ export default function TestDNAReport() {
                 useEnrichment: enrichmentEnabled,
                 rawData: enrichmentEnabled ? null : assessmentData,
                 batchDelay: batchDelay,
-                providerFallback: fallbackProviders
+                providerFallback: fallbackProviders,
+                systemPrompt: systemPrompt
               }
             );
             return chunks;
@@ -240,7 +270,9 @@ export default function TestDNAReport() {
             const result = await generator.generateReport(assessmentData, {
               maxTokens: 4000,
               temperature: 0.7,
-              systemPrompt: systemPrompt
+              systemPrompt: systemPrompt,
+              useEnrichment: monolithicEnrichmentEnabled,
+              enrichedContext: monolithicEnrichmentEnabled ? contextForGeneration : null
             });
             return result;
           })()
@@ -323,7 +355,8 @@ export default function TestDNAReport() {
             useEnrichment: enrichmentEnabled,
             rawData: enrichmentEnabled ? null : assessmentData,
             batchDelay: batchDelay,
-            providerFallback: fallbackProviders
+            providerFallback: fallbackProviders,
+            systemPrompt: systemPrompt
           }
         );
         
@@ -384,7 +417,9 @@ export default function TestDNAReport() {
         const result = await generator.generateReport(assessmentData, {
           maxTokens: 4000,
           temperature: 0.7,
-          systemPrompt: systemPrompt
+          systemPrompt: systemPrompt,
+          useEnrichment: monolithicEnrichmentEnabled,
+          enrichedContext: monolithicEnrichmentEnabled ? contextForGeneration : null
         });
         
         console.log(`[TestPage] Monolithic generation complete: ${result.status}`);
@@ -466,7 +501,8 @@ export default function TestDNAReport() {
           maxTokens: 1500,
           temperature: 0.7,
           useEnrichment: enrichmentEnabled,
-          rawData: enrichmentEnabled ? null : assessmentData
+          rawData: enrichmentEnabled ? null : assessmentData,
+          systemPrompt: systemPrompt
         }
       );
       
@@ -540,12 +576,14 @@ export default function TestDNAReport() {
               onModelChange={handleModelChange}
               onSystemPromptChange={handleSystemPromptChange}
               onEnrichmentToggle={handleEnrichmentToggle}
+              onMonolithicEnrichmentToggle={handleMonolithicEnrichmentToggle}
               onArchitectureChange={handleArchitectureChange}
               onBatchDelayChange={handleBatchDelayChange}
               provider={provider}
               model={model}
               systemPrompt={systemPrompt}
               enrichmentEnabled={enrichmentEnabled}
+              monolithicEnrichmentEnabled={monolithicEnrichmentEnabled}
               architecture={architecture}
               batchDelay={batchDelay}
               status={status}
@@ -572,6 +610,17 @@ export default function TestDNAReport() {
               />
             </div>
           </div>
+
+          {/* Monolithic Data Panel - Full Width - Only show for monolithic/comparison modes */}
+          {(architecture === 'monolithic' || architecture === 'comparison') && (
+            <div style={styles.fullWidthSection}>
+              <MonolithicDataPanel
+                monolithicPrompt={monolithicPrompt}
+                onPromptChange={handleMonolithicPromptChange}
+                isMonolithicMode={architecture === 'monolithic' || architecture === 'comparison'}
+              />
+            </div>
+          )}
 
           {/* Report Output - Full Width */}
           <div style={styles.fullWidthSection}>

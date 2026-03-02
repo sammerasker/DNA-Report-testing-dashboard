@@ -15,7 +15,7 @@ const assessmentDataArbitrary = fc.record({
     name: fc.string(),
     email: fc.emailAddress(),
     userType: fc.constantFrom('entrepreneur', 'employee', 'student'),
-    assessmentDate: fc.date({ min: new Date('2000-01-01'), max: new Date('2030-12-31') }).map(d => d.toISOString())
+    assessmentDate: fc.integer({ min: Date.parse('2000-01-01'), max: Date.parse('2030-12-31') }).map(ts => new Date(ts).toISOString())
   }),
   scores: fc.record(
     Object.keys(TRAIT_GUIDE).reduce((acc, key) => {
