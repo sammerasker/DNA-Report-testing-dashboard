@@ -40,9 +40,31 @@ describe('Remaining Property-Based Tests', () => {
   
   // Property 4: Psychological Framework Validation
   describe('Property 4: Psychological Framework Validation', () => {
-    it('should fail validation when psychological framework fields are missing', () => {
+    it('should fail validation when psychological framework fields are missing but data exists', () => {
+      /**
+       * **Validates: Requirements 2.5, 3.5**
+       */
       fc.assert(
         fc.property(assessmentDataArbitrary, (assessmentData) => {
+          // Check if any assessed trait has psychological framework data
+          let hasFrameworkData = false;
+          Object.entries(assessmentData.scores).forEach(([traitKey, score]) => {
+            if (score !== undefined && score !== null) {
+              const trait = TRAIT_GUIDE[traitKey];
+              if (trait) {
+                const pole = score < 50 ? trait.low : trait.high;
+                if (pole.compassionateName || 
+                    (pole.keyStrengths && pole.keyStrengths.length > 0) ||
+                    (pole.riskFactors && pole.riskFactors.length > 0) ||
+                    (pole.suggestions && pole.suggestions.length > 0) ||
+                    (pole.howToUseStrengths && pole.howToUseStrengths.length > 0) ||
+                    (pole.accommodations && pole.accommodations.length > 0)) {
+                  hasFrameworkData = true;
+                }
+              }
+            }
+          });
+          
           let enrichedContext = enrichAssessmentData(assessmentData);
           
           // Remove psychological framework section
@@ -51,9 +73,14 @@ describe('Remaining Property-Based Tests', () => {
           // Validate
           const result = validateEnrichedContext(assessmentData, enrichedContext);
           
-          // Should fail validation
-          expect(result.valid).toBe(false);
-          expect(result.errors.some(e => e.includes('psychological') || e.includes('framework'))).toBe(true);
+          // Should only fail validation if framework data exists
+          if (hasFrameworkData) {
+            expect(result.valid).toBe(false);
+            expect(result.errors.some(e => e.includes('psychological') || e.includes('framework'))).toBe(true);
+          } else {
+            // If no framework data exists, validation should pass (section is optional)
+            expect(result.valid).toBe(true);
+          }
         }),
         { numRuns: 100 }
       );
@@ -276,23 +303,42 @@ describe('Remaining Property-Based Tests', () => {
         fc.property(extremeScores, (assessmentData) => {
           const enrichedContext = enrichAssessmentData(assessmentData);
           
-          // Check for psychological framework section with risk factors
-          expect(enrichedContext).toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
-          
-          // For extreme scores, risk factors should be present
+          // Check if any assessed trait has riskFactors data
+          let hasRiskFactorsData = false;
           Object.entries(assessmentData.scores).forEach(([traitKey, score]) => {
-            const trait = TRAIT_GUIDE[traitKey];
-            if (trait) {
-              const pole = score < 50 ? trait.low : trait.high;
-              if (pole.riskFactors && pole.riskFactors.length > 0) {
-                // Check that at least one risk factor appears in the context
-                const frameworkSection = enrichedContext.split('=== PSYCHOLOGICAL FRAMEWORK ===')[1];
-                if (frameworkSection) {
-                  expect(frameworkSection).toMatch(/Risk Factor/i);
+            if (score !== undefined && score !== null) {
+              const trait = TRAIT_GUIDE[traitKey];
+              if (trait) {
+                const pole = score < 50 ? trait.low : trait.high;
+                if (pole.riskFactors && pole.riskFactors.length > 0) {
+                  hasRiskFactorsData = true;
                 }
               }
             }
           });
+          
+          // Only assert section presence if risk factors data exists
+          if (hasRiskFactorsData) {
+            expect(enrichedContext).toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
+            
+            // For extreme scores, risk factors should be present
+            Object.entries(assessmentData.scores).forEach(([traitKey, score]) => {
+              const trait = TRAIT_GUIDE[traitKey];
+              if (trait) {
+                const pole = score < 50 ? trait.low : trait.high;
+                if (pole.riskFactors && pole.riskFactors.length > 0) {
+                  // Check that at least one risk factor appears in the context
+                  const frameworkSection = enrichedContext.split('=== PSYCHOLOGICAL FRAMEWORK ===')[1];
+                  if (frameworkSection) {
+                    expect(frameworkSection).toMatch(/Risk Factor/i);
+                  }
+                }
+              }
+            });
+          } else {
+            // If no risk factors data exists, section should be absent
+            expect(enrichedContext).not.toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
+          }
         }),
         { numRuns: 50 }
       );
@@ -306,23 +352,42 @@ describe('Remaining Property-Based Tests', () => {
         fc.property(assessmentDataArbitrary, (assessmentData) => {
           const enrichedContext = enrichAssessmentData(assessmentData);
           
-          // Check for psychological framework section with suggestions
-          expect(enrichedContext).toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
-          
-          // For all scores, suggestions should be present
+          // Check if any assessed trait has suggestions data
+          let hasSuggestionsData = false;
           Object.entries(assessmentData.scores).forEach(([traitKey, score]) => {
-            const trait = TRAIT_GUIDE[traitKey];
-            if (trait) {
-              const pole = score < 50 ? trait.low : trait.high;
-              if (pole.suggestions && pole.suggestions.length > 0) {
-                // Check that suggestions section appears
-                const frameworkSection = enrichedContext.split('=== PSYCHOLOGICAL FRAMEWORK ===')[1];
-                if (frameworkSection) {
-                  expect(frameworkSection).toMatch(/Suggestion/i);
+            if (score !== undefined && score !== null) {
+              const trait = TRAIT_GUIDE[traitKey];
+              if (trait) {
+                const pole = score < 50 ? trait.low : trait.high;
+                if (pole.suggestions && pole.suggestions.length > 0) {
+                  hasSuggestionsData = true;
                 }
               }
             }
           });
+          
+          // Only assert section presence if suggestions data exists
+          if (hasSuggestionsData) {
+            expect(enrichedContext).toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
+            
+            // For all scores, suggestions should be present
+            Object.entries(assessmentData.scores).forEach(([traitKey, score]) => {
+              const trait = TRAIT_GUIDE[traitKey];
+              if (trait) {
+                const pole = score < 50 ? trait.low : trait.high;
+                if (pole.suggestions && pole.suggestions.length > 0) {
+                  // Check that suggestions section appears
+                  const frameworkSection = enrichedContext.split('=== PSYCHOLOGICAL FRAMEWORK ===')[1];
+                  if (frameworkSection) {
+                    expect(frameworkSection).toMatch(/Suggestion/i);
+                  }
+                }
+              }
+            });
+          } else {
+            // If no suggestions data exists, section should be absent
+            expect(enrichedContext).not.toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
+          }
         }),
         { numRuns: 100 }
       );

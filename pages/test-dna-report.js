@@ -13,12 +13,12 @@ import RawDataPanel from '../components/dna-report-test/RawDataPanel';
 import EnrichedDataPanel from '../components/dna-report-test/EnrichedDataPanel';
 import MonolithicDataPanel from '../components/dna-report-test/MonolithicDataPanel';
 import ReportOutputPanel from '../components/dna-report-test/ReportOutputPanel';
-import DebugPanel from '../components/dna-report-test/DebugPanel';
+// import DebugPanel from '../components/dna-report-test/DebugPanel'; // Chunked-specific - commented out
 import { enrichAssessmentData } from '../lib/dna-report-chunked/enrichment';
-import { createChunkExecutor } from '../lib/dna-report-chunked/chunk-executor';
-import ReportAssembler from '../lib/dna-report-chunked/report-assembler';
+// import { createChunkExecutor } from '../lib/dna-report-chunked/chunk-executor'; // Chunked-specific - commented out
+// import ReportAssembler from '../lib/dna-report-chunked/report-assembler'; // Chunked-specific - commented out
 import QualityMetrics from '../lib/dna-report-chunked/quality-metrics';
-import { createOpenRouterProvider, createHuggingFaceProvider, createMoonshotProvider } from '../lib/dna-report-chunked/api-provider';
+import { createHuggingFaceProvider, createMoonshotProvider } from '../lib/dna-report-chunked/api-provider';
 import { createMonolithicGenerator, generateMonolithicPromptData } from '../lib/dna-report-chunked/monolithic-generator';
 
 export default function TestDNAReport() {
@@ -37,19 +37,21 @@ export default function TestDNAReport() {
   // UI state
   const [enrichmentEnabled, setEnrichmentEnabled] = useState(true);
   const [monolithicEnrichmentEnabled, setMonolithicEnrichmentEnabled] = useState(false);
-  const [architecture, setArchitecture] = useState('monolithic'); // 'chunked', 'monolithic', 'comparison'
-  const [batchDelay, setBatchDelay] = useState(5); // Default 5 seconds
+  // const [architecture, setArchitecture] = useState('monolithic'); // Chunked mode commented out - only monolithic now
+  const architecture = 'monolithic'; // Hardcoded to monolithic
+  // const [batchDelay, setBatchDelay] = useState(5); // Chunked-specific - commented out
+  const [timeout, setTimeout] = useState(45000); // Default 45 seconds (increased from 30s)
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
   
   // Report generation state
-  const [chunkResults, setChunkResults] = useState([]);
+  // const [chunkResults, setChunkResults] = useState([]); // Chunked-specific - commented out
   const [assembledReport, setAssembledReport] = useState('');
   const [qualityMetrics, setQualityMetrics] = useState(null);
   
-  // Comparison mode state
-  const [monolithicReport, setMonolithicReport] = useState('');
-  const [monolithicMetrics, setMonolithicMetrics] = useState(null);
+  // Comparison mode state - Commented out (no longer using comparison mode)
+  // const [monolithicReport, setMonolithicReport] = useState('');
+  // const [monolithicMetrics, setMonolithicMetrics] = useState(null);
   
   // Performance tracking state
   const [tokenCount, setTokenCount] = useState(0);
@@ -157,18 +159,27 @@ export default function TestDNAReport() {
   };
   
   /**
-   * Handle architecture mode change
+   * Handle timeout change
    */
-  const handleArchitectureChange = (mode) => {
-    setArchitecture(mode);
+  const handleTimeoutChange = (newTimeout) => {
+    setTimeout(Number(newTimeout));
   };
   
-  /**
-   * Handle batch delay change
-   */
-  const handleBatchDelayChange = (delay) => {
-    setBatchDelay(delay);
-  };
+  // /**
+  //  * Handle architecture mode change
+  //  * COMMENTED OUT - Only monolithic mode now
+  //  */
+  // const handleArchitectureChange = (mode) => {
+  //   setArchitecture(mode);
+  // };
+  
+  // /**
+  //  * Handle batch delay change
+  //  * COMMENTED OUT - Chunked-specific
+  //  */
+  // const handleBatchDelayChange = (delay) => {
+  //   setBatchDelay(delay);
+  // };
   
   /**
    * Handle assessment data change
@@ -197,11 +208,11 @@ export default function TestDNAReport() {
       setTokenCount(0);
       setElapsedTime(0);
       setRequestsUsed(0);
-      setChunkResults([]);
+      // setChunkResults([]); // Chunked-specific - commented out
       setAssembledReport('');
       setQualityMetrics(null);
-      setMonolithicReport('');
-      setMonolithicMetrics(null);
+      // setMonolithicReport(''); // Comparison mode - commented out
+      // setMonolithicMetrics(null); // Comparison mode - commented out
       
       // Step 1: Enrich assessment data if enrichment is enabled
       let contextForGeneration = '';
@@ -215,33 +226,71 @@ export default function TestDNAReport() {
         setEnrichedContext('');
       }
       
-      // Step 2: Create API provider based on selected provider and fallback providers
-      console.log(`[TestPage] Creating API provider: ${provider}`);
+      // Step 2: Create API provider based on selected provider with custom timeout
+      console.log(`[TestPage] Creating API provider: ${provider} with timeout: ${timeout}ms`);
       let apiProvider;
-      let fallbackProviders = [];
+      // let fallbackProviders = []; // Chunked-specific - commented out
       
-      // Create primary provider
-      if (provider === 'openrouter') {
-        apiProvider = createOpenRouterProvider();
-        // Fallback order: HuggingFace -> Moonshot
-        fallbackProviders = [createHuggingFaceProvider(), createMoonshotProvider()];
-      } else if (provider === 'huggingface') {
-        apiProvider = createHuggingFaceProvider();
-        // Fallback order: Moonshot -> OpenRouter
-        fallbackProviders = [createMoonshotProvider(), createOpenRouterProvider()];
+      // Create primary provider with custom timeout
+      if (provider === 'huggingface') {
+        apiProvider = createHuggingFaceProvider(timeout);
+        // Chunked fallback logic - commented out
+        // fallbackProviders = [createMoonshotProvider(timeout)];
       } else if (provider === 'moonshot') {
-        apiProvider = createMoonshotProvider();
-        // Fallback order: OpenRouter -> HuggingFace
-        fallbackProviders = [createOpenRouterProvider(), createHuggingFaceProvider()];
+        apiProvider = createMoonshotProvider(timeout);
+        // Chunked fallback logic - commented out
+        // fallbackProviders = [createHuggingFaceProvider(timeout)];
       } else {
-        apiProvider = createOpenRouterProvider(); // fallback
-        fallbackProviders = [createHuggingFaceProvider(), createMoonshotProvider()];
+        apiProvider = createMoonshotProvider(timeout); // Default fallback
       }
       
-      console.log(`[TestPage] Fallback providers configured: ${fallbackProviders.map(p => p.provider).join(' -> ')}`);
+      // console.log(`[TestPage] Fallback providers configured: ${fallbackProviders.map(p => p.provider).join(' -> ')}`); // Chunked-specific
       
-      // Step 3: Execute based on architecture mode
-      if (architecture === 'comparison') {
+      // Step 3: Execute monolithic generation (only mode now)
+      // ALL CHUNKED AND COMPARISON MODE LOGIC COMMENTED OUT
+      
+      console.log('[TestPage] Executing monolithic architecture only');
+      const generator = createMonolithicGenerator(apiProvider);
+      
+      const result = await generator.generateReport(assessmentData, {
+        maxTokens: 4000,
+        temperature: 0.7,
+        systemPrompt: systemPrompt,
+        useEnrichment: monolithicEnrichmentEnabled,
+        enrichedContext: monolithicEnrichmentEnabled ? contextForGeneration : null
+      });
+      
+      console.log(`[TestPage] Monolithic generation complete: ${result.status}`);
+      
+      // Check if generation failed
+      if (result.status === 'error') {
+        throw new Error(result.error?.message || 'Monolithic generation failed');
+      }
+      
+      setAssembledReport(result.content);
+      
+      // Set token count
+      setTokenCount(result.totalTokens || 0);
+      
+      // Set requests used (monolithic = 1 request)
+      setRequestsUsed(1);
+      
+      // Calculate quality metrics (only if report is not empty)
+      if (result.content && result.content.trim().length > 0) {
+        console.log('[TestPage] Calculating quality metrics...');
+        const metricsEngine = new QualityMetrics();
+        const metrics = metricsEngine.calculateMetrics(result.content, assessmentData);
+        setQualityMetrics(metrics);
+        console.log(`[TestPage] Quality metrics calculated: ${metrics.overallScore}/100`);
+      } else {
+        console.warn('[TestPage] Monolithic report is empty, skipping metrics calculation');
+        setQualityMetrics(null);
+      }
+      
+      /* ========================================
+         CHUNKED AND COMPARISON MODE - COMMENTED OUT
+         ======================================== */
+      /*
         console.log('[TestPage] Comparison mode - executing both architectures');
         
         // Execute both chunked and monolithic in parallel
@@ -452,6 +501,8 @@ export default function TestDNAReport() {
           setMonolithicMetrics(null);
         }
       }
+      */
+      /* ======================================== END COMMENTED OUT CODE ======================================== */
       
       // Update final state
       setStatus('complete');
@@ -465,10 +516,15 @@ export default function TestDNAReport() {
     }
   };
   
+  /* ========================================
+     CHUNKED-SPECIFIC FUNCTION - COMMENTED OUT
+     ======================================== */
   /**
    * Handle chunk retry
    * Re-executes a single failed chunk while preserving successful results
+   * COMMENTED OUT - Chunked mode no longer used
    */
+  /*
   const handleRetryChunk = async (chunkId) => {
     console.log(`[TestPage] Retrying chunk ${chunkId}...`);
     
@@ -553,6 +609,8 @@ export default function TestDNAReport() {
       setErrorMessage(`Retry failed: ${error.message}`);
     }
   };
+  */
+  /* ======================================== END COMMENTED OUT CODE ======================================== */
   
   return (
     <>
@@ -577,15 +635,13 @@ export default function TestDNAReport() {
               onSystemPromptChange={handleSystemPromptChange}
               onEnrichmentToggle={handleEnrichmentToggle}
               onMonolithicEnrichmentToggle={handleMonolithicEnrichmentToggle}
-              onArchitectureChange={handleArchitectureChange}
-              onBatchDelayChange={handleBatchDelayChange}
+              onTimeoutChange={handleTimeoutChange}
               provider={provider}
               model={model}
               systemPrompt={systemPrompt}
               enrichmentEnabled={enrichmentEnabled}
               monolithicEnrichmentEnabled={monolithicEnrichmentEnabled}
-              architecture={architecture}
-              batchDelay={batchDelay}
+              timeout={timeout}
               status={status}
               tokenCount={tokenCount}
               elapsedTime={elapsedTime}
@@ -611,38 +667,33 @@ export default function TestDNAReport() {
             </div>
           </div>
 
-          {/* Monolithic Data Panel - Full Width - Only show for monolithic/comparison modes */}
-          {(architecture === 'monolithic' || architecture === 'comparison') && (
-            <div style={styles.fullWidthSection}>
-              <MonolithicDataPanel
-                monolithicPrompt={monolithicPrompt}
-                onPromptChange={handleMonolithicPromptChange}
-                isMonolithicMode={architecture === 'monolithic' || architecture === 'comparison'}
-              />
-            </div>
-          )}
+          {/* Monolithic Data Panel - Full Width */}
+          <div style={styles.fullWidthSection}>
+            <MonolithicDataPanel
+              monolithicPrompt={monolithicPrompt}
+              onPromptChange={handleMonolithicPromptChange}
+            />
+          </div>
 
           {/* Report Output - Full Width */}
           <div style={styles.fullWidthSection}>
             <ReportOutputPanel
               report={assembledReport}
               metrics={qualityMetrics}
-              isComparison={architecture === 'comparison'}
-              monolithicReport={monolithicReport}
-              monolithicMetrics={monolithicMetrics}
+              isComparison={false}
               profileData={assessmentData?.profile}
             />
           </div>
 
-          {/* Debug Panel - Full Width Bottom - Only show for chunked/comparison modes */}
-          {(architecture === 'chunked' || architecture === 'comparison') && (
+          {/* Debug Panel - COMMENTED OUT - Chunked-specific */}
+          {/* {(architecture === 'chunked' || architecture === 'comparison') && (
             <div style={styles.fullWidthSection}>
               <DebugPanel
                 chunks={chunkResults}
                 onRetryChunk={handleRetryChunk}
               />
             </div>
-          )}
+          )} */}
         </div>
       </main>
     </>

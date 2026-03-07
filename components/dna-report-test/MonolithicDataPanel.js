@@ -14,7 +14,6 @@ import styles from './MonolithicDataPanel.module.css';
  * @typedef {Object} MonolithicDataPanelProps
  * @property {string} monolithicPrompt - Monolithic prompt text
  * @property {Function} onPromptChange - Callback when prompt is edited
- * @property {boolean} isMonolithicMode - Whether monolithic mode is active
  */
 
 /**
@@ -23,8 +22,7 @@ import styles from './MonolithicDataPanel.module.css';
  */
 export default function MonolithicDataPanel({ 
   monolithicPrompt = '', 
-  onPromptChange,
-  isMonolithicMode = false
+  onPromptChange
 }) {
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -44,51 +42,38 @@ export default function MonolithicDataPanel({
     <div className={styles.panel}>
       <div className={styles.header}>
         <h3 className={styles.title}>Monolithic Prompt Data</h3>
-        {!isMonolithicMode && (
-          <span className={styles.inactiveLabel}>
-            (Only used in Monolithic/Comparison modes)
-          </span>
-        )}
       </div>
 
-      {!isMonolithicMode ? (
-        <div className={styles.inactiveMessage}>
-          <p>Switch to Monolithic or Comparison mode to see the prompt data.</p>
-        </div>
-      ) : (
-        <>
-          <div className={styles.stats}>
-            <span className={styles.stat}>
-              Characters: <strong>{charCount.toLocaleString()}</strong>
-            </span>
-            <span className={styles.stat}>
-              Est. Tokens: <strong>{estimatedTokens.toLocaleString()}</strong>
-            </span>
-            <button 
-              onClick={handleCopy}
-              className={styles.copyButton}
-            >
-              {copySuccess ? '✓ Copied!' : '📋 Copy'}
-            </button>
-          </div>
+      <div className={styles.stats}>
+        <span className={styles.stat}>
+          Characters: <strong>{charCount.toLocaleString()}</strong>
+        </span>
+        <span className={styles.stat}>
+          Est. Tokens: <strong>{estimatedTokens.toLocaleString()}</strong>
+        </span>
+        <button 
+          onClick={handleCopy}
+          className={styles.copyButton}
+        >
+          {copySuccess ? '✓ Copied!' : '📋 Copy'}
+        </button>
+      </div>
 
-          <div className={styles.content}>
-            <textarea
-              value={monolithicPrompt}
-              onChange={(e) => onPromptChange(e.target.value)}
-              className={styles.textarea}
-              placeholder="Monolithic prompt will appear here..."
-              spellCheck={false}
-            />
-          </div>
+      <div className={styles.content}>
+        <textarea
+          value={monolithicPrompt}
+          onChange={(e) => onPromptChange(e.target.value)}
+          className={styles.textarea}
+          placeholder="Monolithic prompt will appear here..."
+          spellCheck={false}
+        />
+      </div>
 
-          <div className={styles.helpText}>
-            <p>
-              💡 This is the prompt that will be sent to the API. You can edit it before generating the report.
-            </p>
-          </div>
-        </>
-      )}
+      <div className={styles.helpText}>
+        <p>
+          💡 This is the prompt that will be sent to the API. You can edit it before generating the report.
+        </p>
+      </div>
     </div>
   );
 }

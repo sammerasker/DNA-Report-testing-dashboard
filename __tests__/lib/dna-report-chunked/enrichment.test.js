@@ -92,7 +92,7 @@ describe('Data Enrichment Layer - Unit Tests', () => {
 
     test('should be a reasonably long output', () => {
       expect(enriched.length).toBeGreaterThan(3000);
-      expect(enriched.length).toBeLessThan(25000); // Increased to accommodate all new sections (behavioral indicators, psychological framework, etc.)
+      expect(enriched.length).toBeLessThan(25000); // Accommodates both always-present sections and conditional sections (behavioral indicators, psychological framework appear only when trait data exists)
     });
   });
 

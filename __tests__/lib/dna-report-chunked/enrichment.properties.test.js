@@ -17,7 +17,7 @@ const assessmentDataArbitrary = fc.record({
     userType: fc.constantFrom('entrepreneur', 'employee', 'student'),
     assessmentDate: fc.integer({ min: Date.parse('2000-01-01'), max: Date.parse('2030-12-31') }).map(ts => new Date(ts).toISOString())
   }),
-  scores: fc.record(
+  normalizedScores: fc.record(
     Object.keys(TRAIT_GUIDE).reduce((acc, key) => {
       acc[key] = fc.integer({ min: 0, max: 100 });
       return acc;
@@ -120,7 +120,7 @@ describe('Enhanced Enrichment Layer - Property-Based Tests', () => {
           name: fc.string(),
           email: fc.emailAddress()
         }),
-        scores: fc.record(
+        normalizedScores: fc.record(
           Object.keys(TRAIT_GUIDE).reduce((acc, key) => {
             acc[key] = fc.integer({ min: 0, max: 100 });
             return acc;
@@ -160,7 +160,7 @@ describe('Enhanced Enrichment Layer - Property-Based Tests', () => {
           name: fc.string(),
           email: fc.emailAddress()
         }),
-        scores: fc.record(
+        normalizedScores: fc.record(
           Object.keys(TRAIT_GUIDE).reduce((acc, key) => {
             acc[key] = fc.integer({ min: 0, max: 100 });
             return acc;
@@ -257,28 +257,42 @@ describe('Enhanced Enrichment Layer - Property-Based Tests', () => {
   });
 
   // Property 5: Behavioral Indicators in Enriched Context
+  // **Validates: Requirements 2.2, 3.2**
   describe('Property 5: Behavioral Indicators in Enriched Context', () => {
-    it('should include behavioral indicators for assessed traits', () => {
+    it('should include behavioral indicators section only when trait data exists', () => {
       fc.assert(
         fc.property(assessmentDataArbitrary, (assessmentData) => {
           const enrichedContext = enrichAssessmentData(assessmentData);
           
-          // Check for behavioral indicators section
-          expect(enrichedContext).toContain('=== BEHAVIORAL INDICATORS ===');
-          
-          // For each assessed trait, check that behavioral indicators are present
-          Object.entries(assessmentData.scores).forEach(([traitKey, score]) => {
+          // Check if any trait has behavioral indicators defined
+          const hasAnyBehavioralIndicators = Object.entries(assessmentData.normalizedScores || {}).some(([traitKey, score]) => {
             if (score !== undefined && score !== null) {
               const trait = TRAIT_GUIDE[traitKey];
-              if (trait && trait.behavioralIndicators && trait.behavioralIndicators.length > 0) {
-                // Check that trait name appears in behavioral indicators section
-                const behavioralSection = enrichedContext.split('=== BEHAVIORAL INDICATORS ===')[1];
-                if (behavioralSection) {
-                  expect(behavioralSection).toContain(trait.displayName);
+              return trait && trait.behavioralIndicators && trait.behavioralIndicators.length > 0;
+            }
+            return false;
+          });
+          
+          if (hasAnyBehavioralIndicators) {
+            // Section should be present if data exists
+            expect(enrichedContext).toContain('=== BEHAVIORAL INDICATORS ===');
+            
+            // For each assessed trait with behavioral indicators, check that they appear
+            Object.entries(assessmentData.normalizedScores || {}).forEach(([traitKey, score]) => {
+              if (score !== undefined && score !== null) {
+                const trait = TRAIT_GUIDE[traitKey];
+                if (trait && trait.behavioralIndicators && trait.behavioralIndicators.length > 0) {
+                  const behavioralSection = enrichedContext.split('=== BEHAVIORAL INDICATORS ===')[1];
+                  if (behavioralSection) {
+                    expect(behavioralSection).toContain(trait.displayName);
+                  }
                 }
               }
-            }
-          });
+            });
+          } else {
+            // Section should NOT be present if no data exists
+            expect(enrichedContext).not.toContain('=== BEHAVIORAL INDICATORS ===');
+          }
         }),
         { numRuns: 100 }
       );

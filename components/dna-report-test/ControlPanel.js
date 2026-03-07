@@ -17,14 +17,16 @@ import LimitsCounter from './LimitsCounter';
  * @property {Function} onGenerate - Callback when generate button is clicked
  * @property {Function} onProviderChange - Callback when API provider changes
  * @property {Function} onModelChange - Callback when model selection changes
- * @property {Function} onEnrichmentToggle - Callback when enrichment toggle changes
- * @property {Function} onArchitectureChange - Callback when architecture mode changes
- * @property {Function} onBatchDelayChange - Callback when batch delay changes
- * @property {string} provider - Current API provider ('openrouter' or 'huggingface')
+ * @property {Function} onSystemPromptChange - Callback when system prompt changes
+ * @property {Function} onEnrichmentToggle - Callback when enrichment toggle changes (deprecated, kept for compatibility)
+ * @property {Function} onMonolithicEnrichmentToggle - Callback when monolithic enrichment toggle changes
+ * @property {Function} onTimeoutChange - Callback when timeout changes
+ * @property {string} provider - Current API provider ('huggingface' or 'moonshot')
  * @property {string} model - Current model selection
- * @property {boolean} enrichmentEnabled - Whether data enrichment is enabled
- * @property {string} architecture - Architecture mode ('chunked', 'monolithic', 'comparison')
- * @property {number} batchDelay - Delay in seconds between chunk batches (0, 2, 5, 10, 15)
+ * @property {string} systemPrompt - Current system prompt
+ * @property {boolean} enrichmentEnabled - Whether data enrichment is enabled (deprecated, kept for compatibility)
+ * @property {boolean} monolithicEnrichmentEnabled - Whether monolithic enrichment is enabled
+ * @property {number} timeout - Request timeout in milliseconds
  * @property {string} status - Current status ('idle', 'generating', 'complete', 'error')
  * @property {number} tokenCount - Total tokens used
  * @property {number} elapsedTime - Elapsed time in milliseconds
@@ -43,15 +45,17 @@ export default function ControlPanel({
   onSystemPromptChange,
   onEnrichmentToggle,
   onMonolithicEnrichmentToggle,
-  onArchitectureChange,
-  onBatchDelayChange,
-  provider = 'openrouter',
+  onTimeoutChange,
+  // onArchitectureChange, // Chunked-specific - commented out
+  // onBatchDelayChange, // Chunked-specific - commented out
+  provider = 'moonshot',
   model = '',
   systemPrompt = '',
   enrichmentEnabled = true,
   monolithicEnrichmentEnabled = false,
-  architecture = 'chunked',
-  batchDelay = 5,
+  timeout = 45000,
+  // architecture = 'chunked', // Chunked-specific - commented out
+  // batchDelay = 5, // Chunked-specific - commented out
   status = 'idle',
   tokenCount = 0,
   elapsedTime = 0,
@@ -75,7 +79,13 @@ export default function ControlPanel({
     moonshot: [
       { value: 'moonshot-v1-128k', label: 'Moonshot v1 128K (Default)' },
       { value: 'moonshot-v1-8k', label: 'Moonshot v1 8K' },
-      { value: 'moonshot-v1-32k', label: 'Moonshot v1 32K' }
+      { value: 'moonshot-v1-32k', label: 'Moonshot v1 32K' },
+      { value: 'kimi-latest', label: 'Kimi Latest' },
+      { value: 'kimi-latest-8k', label: 'Kimi Latest 8K' },
+      { value: 'kimi-latest-32k', label: 'Kimi Latest 32K' },
+      { value: 'kimi-latest-128k', label: 'Kimi Latest 128K' },
+      { value: 'kimi-k2', label: 'Kimi K2' },
+      { value: 'kimi-k2.5', label: 'Kimi K2.5' }
     ]
   };
 
@@ -146,15 +156,6 @@ export default function ControlPanel({
       <div className={styles.formGroup}>
         <label htmlFor="systemPrompt" className={styles.label}>
           System Prompt
-          {architecture === 'chunked' && (
-            <span className={styles.labelHint}> (for chunked generation)</span>
-          )}
-          {architecture === 'monolithic' && (
-            <span className={styles.labelHint}> (for monolithic generation)</span>
-          )}
-          {architecture === 'comparison' && (
-            <span className={styles.labelHint}> (for both architectures)</span>
-          )}
         </label>
         <textarea
           id="systemPrompt"
@@ -170,52 +171,29 @@ export default function ControlPanel({
         </p>
       </div>
 
-      {/* Enrichment Toggle */}
+      {/* Monolithic Enrichment Toggle */}
       <div className={styles.formGroup}>
         <label className={styles.toggleLabel}>
           <input
             type="checkbox"
-            checked={enrichmentEnabled}
-            onChange={(e) => onEnrichmentToggle(e.target.checked)}
+            checked={monolithicEnrichmentEnabled}
+            onChange={(e) => onMonolithicEnrichmentToggle(e.target.checked)}
             disabled={isGenerating}
             className={styles.checkbox}
           />
           <span className={styles.toggleText}>
-            Enable Data Enrichment (Chunked Mode)
+            Use Enriched Context
           </span>
         </label>
         <p className={styles.helpText}>
-          {enrichmentEnabled 
-            ? 'Using enriched context with interpretations for chunked generation' 
-            : 'Using raw JSON assessment data for chunked generation'}
+          {monolithicEnrichmentEnabled 
+            ? '📚 Using detailed enriched context (12 sections, ~6000 tokens)' 
+            : '📄 Using simple raw data prompt (~500 tokens)'}
         </p>
       </div>
 
-      {/* Monolithic Enrichment Toggle - Only show for monolithic/comparison modes */}
-      {(architecture === 'monolithic' || architecture === 'comparison') && (
-        <div className={styles.formGroup}>
-          <label className={styles.toggleLabel}>
-            <input
-              type="checkbox"
-              checked={monolithicEnrichmentEnabled}
-              onChange={(e) => onMonolithicEnrichmentToggle(e.target.checked)}
-              disabled={isGenerating}
-              className={styles.checkbox}
-            />
-            <span className={styles.toggleText}>
-              Use Enriched Context for Monolithic
-            </span>
-          </label>
-          <p className={styles.helpText}>
-            {monolithicEnrichmentEnabled 
-              ? '📚 Using detailed enriched context (12 sections, ~6000 tokens)' 
-              : '📄 Using simple raw data prompt (~500 tokens)'}
-          </p>
-        </div>
-      )}
-
-      {/* Architecture Selection */}
-      <div className={styles.formGroup}>
+      {/* Architecture Selection - COMMENTED OUT - Only monolithic mode now */}
+      {/* <div className={styles.formGroup}>
         <label htmlFor="architecture" className={styles.label}>
           Architecture Mode
         </label>
@@ -271,10 +249,10 @@ export default function ControlPanel({
             </ul>
           </div>
         )}
-      </div>
+      </div> */}
 
-      {/* Batch Delay Selection - Only show for chunked mode */}
-      {architecture === 'chunked' && (
+      {/* Batch Delay Selection - COMMENTED OUT - Chunked-specific */}
+      {/* {architecture === 'chunked' && (
         <div className={styles.formGroup}>
           <label htmlFor="batchDelay" className={styles.label}>
             Batch Delay (Rate Limit Protection)
@@ -300,7 +278,38 @@ export default function ControlPanel({
             {batchDelay === 15 && '🐢 Maximum safety - slowest but safest'}
           </p>
         </div>
-      )}
+      )} */}
+
+      {/* Timeout Selection */}
+      <div className={styles.formGroup}>
+        <label htmlFor="timeout" className={styles.label}>
+          Request Timeout
+        </label>
+        <select
+          id="timeout"
+          value={timeout}
+          onChange={(e) => onTimeoutChange(Number(e.target.value))}
+          disabled={isGenerating}
+          className={styles.select}
+        >
+          <option value={30000}>30 seconds</option>
+          <option value={45000}>45 seconds (Default)</option>
+          <option value={60000}>60 seconds (1 minute)</option>
+          <option value={90000}>90 seconds (1.5 minutes)</option>
+          <option value={120000}>120 seconds (2 minutes)</option>
+          <option value={180000}>180 seconds (3 minutes)</option>
+          <option value={240000}>240 seconds (4 minutes)</option>
+        </select>
+        <p className={styles.helpText}>
+          {timeout === 30000 && '⚠️ Short timeout - may fail for large reports'}
+          {timeout === 45000 && '✅ Default - good for most reports'}
+          {timeout === 60000 && '⏱️ Extended - for longer reports'}
+          {timeout === 90000 && '🕐 Long - for complex reports'}
+          {timeout === 120000 && '🕑 Very long - for detailed reports'}
+          {timeout === 180000 && '🕒 Extra long - for comprehensive reports'}
+          {timeout === 240000 && '🕓 Maximum - for very large reports'}
+        </p>
+      </div>
 
       {/* Generate Button */}
       <div className={styles.formGroup}>
