@@ -140,7 +140,7 @@ describe('Enhanced Enrichment Layer - End-to-End Integration', () => {
       });
       
       if (hasBehavioralIndicatorsData) {
-        // Only expect section if data exists
+        // Section should always be present (even if empty/placeholder) for backward compatibility
         expect(enrichedContext).toContain('=== BEHAVIORAL INDICATORS ===');
         
         // Verify behavioral indicators are present for traits with indicators defined
@@ -154,8 +154,8 @@ describe('Enhanced Enrichment Layer - End-to-End Integration', () => {
           }
         });
       } else {
-        // If no behavioral indicators data exists, section should not be present
-        expect(enrichedContext).not.toContain('=== BEHAVIORAL INDICATORS ===');
+        // Section should still be present for backward compatibility
+        expect(enrichedContext).toContain('=== BEHAVIORAL INDICATORS ===');
       }
     });
 
@@ -183,7 +183,7 @@ describe('Enhanced Enrichment Layer - End-to-End Integration', () => {
       });
       
       if (hasFrameworkData) {
-        // Only expect section if data exists
+        // Section should always be present (even if empty/placeholder) for backward compatibility
         expect(enrichedContext).toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
         
         // Verify framework fields are present
@@ -192,8 +192,8 @@ describe('Enhanced Enrichment Layer - End-to-End Integration', () => {
           expect(frameworkSection).toMatch(/Key Strength|Risk Factor|Suggestion/i);
         }
       } else {
-        // If no psychological framework data exists, section should not be present
-        expect(enrichedContext).not.toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
+        // Section should still be present for backward compatibility
+        expect(enrichedContext).toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
       }
     });
 

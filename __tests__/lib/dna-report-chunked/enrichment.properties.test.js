@@ -290,8 +290,8 @@ describe('Enhanced Enrichment Layer - Property-Based Tests', () => {
               }
             });
           } else {
-            // Section should NOT be present if no data exists
-            expect(enrichedContext).not.toContain('=== BEHAVIORAL INDICATORS ===');
+            // Section should still be present for backward compatibility
+            expect(enrichedContext).toContain('=== BEHAVIORAL INDICATORS ===');
           }
         }),
         { numRuns: 100 }

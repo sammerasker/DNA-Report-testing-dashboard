@@ -187,8 +187,9 @@ describe('TestDNAReport Page - Property Tests', () => {
    * 
    * Verifies that comparison mode toggle exists in the UI.
    * Note: Full dual execution testing requires integration with real API calls.
+   * Note: Skipped because comparison mode is currently disabled in the UI.
    */
-  test('Property 34: Both architectures execute in comparison mode', async () => {
+  test.skip('Property 34: Both architectures execute in comparison mode', async () => {
     const { container } = render(<TestDNAReport />);
     
     await waitFor(() => {
@@ -215,8 +216,9 @@ describe('TestDNAReport Page - Property Tests', () => {
    * 
    * Verifies that comparison mode toggle exists and can be toggled.
    * Note: Full output visibility testing requires integration with real report generation.
+   * Note: Skipped because comparison mode is currently disabled in the UI.
    */
-  test('Property 37: Comparison mode toggle controls output visibility', async () => {
+  test.skip('Property 37: Comparison mode toggle controls output visibility', async () => {
     const { container } = render(<TestDNAReport />);
     
     await waitFor(() => {

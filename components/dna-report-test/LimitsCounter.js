@@ -15,13 +15,12 @@ import styles from './LimitsCounter.module.css';
  * Provider limits configuration (free tier)
  */
 const PROVIDER_LIMITS = {
-  // OpenRouter - Temporarily hidden (commented out)
-  // openrouter: {
-  //   name: 'OpenRouter',
-  //   daily: 50,
-  //   weekly: 350,  // 50 * 7
-  //   monthly: 1500 // 50 * 30
-  // },
+  openrouter: {
+    name: 'OpenRouter',
+    daily: 50,
+    weekly: 350,  // 50 * 7
+    monthly: 1500 // 50 * 30
+  },
   huggingface: {
     name: 'Hugging Face',
     daily: 1000,

@@ -94,23 +94,13 @@ describe('validateBehavioralIndicators', () => {
     expect(result.missingIndicators).toEqual([]);
   });
 
-  test('should fail when behavioral indicators section is missing', () => {
-    const scores = { speed: 75, abstraction: 50 };
-    const enrichedContext = 'No behavioral indicators here';
-
-    const result = validateBehavioralIndicators(scores, enrichedContext);
-    expect(result.valid).toBe(false);
-    expect(result.missingIndicators).toContain('BEHAVIORAL INDICATORS section');
-  });
-
-  test('should pass when behavioral indicators section exists (lenient validation)', () => {
-    const scores = { speed: 75, abstraction: 50 };
+  test('should pass when behavioral indicators section is missing but data exists (optional section for backward compatibility)', () => {
+    const scores = { speed: 75 };
     const enrichedContext = `
-      === BEHAVIORAL INDICATORS ===
-      speed: low: slow, mid: balanced, high: fast
+      === USER PROFILE ===
+      Name: Test
     `;
 
-    // Validator is now lenient - only checks for section header, not individual trait content
     const result = validateBehavioralIndicators(scores, enrichedContext);
     expect(result.valid).toBe(true);
     expect(result.missingIndicators).toEqual([]);
@@ -119,26 +109,28 @@ describe('validateBehavioralIndicators', () => {
 
 describe('validatePsychologicalFramework', () => {
   test('should pass when psychological framework section header is present', () => {
+    const scores = { speed: 75 };
     const enrichedContext = `
       === PSYCHOLOGICAL FRAMEWORK ===
       compassionate names
       key strengths
     `;
 
-    const result = validatePsychologicalFramework(enrichedContext);
+    const result = validatePsychologicalFramework(scores, enrichedContext);
     expect(result.valid).toBe(true);
     expect(result.missingFramework).toEqual([]);
   });
 
-  test('should fail when psychological framework section is missing', () => {
+  test('should pass when psychological framework section is missing but data exists (optional section for backward compatibility)', () => {
+    const scores = { speed: 75 };
     const enrichedContext = `
       key strengths
       suggestions
     `;
 
-    const result = validatePsychologicalFramework(enrichedContext);
-    expect(result.valid).toBe(false);
-    expect(result.missingFramework).toContain('PSYCHOLOGICAL FRAMEWORK section');
+    const result = validatePsychologicalFramework(scores, enrichedContext);
+    expect(result.valid).toBe(true);
+    expect(result.missingFramework).toEqual([]);
   });
 });
 

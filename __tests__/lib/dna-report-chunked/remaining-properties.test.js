@@ -78,7 +78,7 @@ describe('Remaining Property-Based Tests', () => {
             expect(result.valid).toBe(false);
             expect(result.errors.some(e => e.includes('psychological') || e.includes('framework'))).toBe(true);
           } else {
-            // If no framework data exists, validation should pass (section is optional)
+            // Section should still be present for backward compatibility
             expect(result.valid).toBe(true);
           }
         }),
@@ -336,8 +336,8 @@ describe('Remaining Property-Based Tests', () => {
               }
             });
           } else {
-            // If no risk factors data exists, section should be absent
-            expect(enrichedContext).not.toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
+            // Section should still be present for backward compatibility
+            expect(enrichedContext).toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
           }
         }),
         { numRuns: 50 }
@@ -385,8 +385,8 @@ describe('Remaining Property-Based Tests', () => {
               }
             });
           } else {
-            // If no suggestions data exists, section should be absent
-            expect(enrichedContext).not.toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
+            // Section should still be present for backward compatibility
+            expect(enrichedContext).toContain('=== PSYCHOLOGICAL FRAMEWORK ===');
           }
         }),
         { numRuns: 100 }

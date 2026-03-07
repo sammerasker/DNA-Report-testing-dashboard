@@ -154,7 +154,13 @@ describe('Backward Compatibility Integration Tests', () => {
         const enrichedContext = enrichAssessmentData(sample.data);
         
         originalSections.forEach(section => {
-          expect(enrichedContext).toContain(section);
+          try {
+            expect(enrichedContext).toContain(section);
+          } catch (error) {
+            console.log(`Missing section: ${section}`);
+            console.log('Enriched context preview:', enrichedContext.substring(0, 500));
+            throw error;
+          }
         });
       });
     });

@@ -14,7 +14,10 @@ describe('ControlPanel', () => {
     onProviderChange: jest.fn(),
     onModelChange: jest.fn(),
     onEnrichmentToggle: jest.fn(),
-    onArchitectureChange: jest.fn()
+    onMonolithicEnrichmentToggle: jest.fn(),
+    onArchitectureChange: jest.fn(),
+    onSystemPromptChange: jest.fn(),
+    onTimeoutChange: jest.fn()
   };
 
   beforeEach(() => {
@@ -27,55 +30,57 @@ describe('ControlPanel', () => {
   });
 
   test('renders API provider dropdown', () => {
-    render(<ControlPanel {...mockCallbacks} provider="openrouter" />);
+    render(<ControlPanel {...mockCallbacks} provider="huggingface" />);
     const select = screen.getByLabelText('API Provider');
     expect(select).toBeInTheDocument();
-    expect(select.value).toBe('openrouter');
+    expect(select.value).toBe('huggingface');
   });
 
   test('calls onProviderChange when provider is changed', () => {
-    render(<ControlPanel {...mockCallbacks} provider="openrouter" />);
+    render(<ControlPanel {...mockCallbacks} provider="huggingface" />);
     const select = screen.getByLabelText('API Provider');
-    fireEvent.change(select, { target: { value: 'huggingface' } });
-    expect(mockCallbacks.onProviderChange).toHaveBeenCalledWith('huggingface');
+    fireEvent.change(select, { target: { value: 'moonshot' } });
+    expect(mockCallbacks.onProviderChange).toHaveBeenCalledWith('moonshot');
   });
 
   test('renders model selector', () => {
-    render(<ControlPanel {...mockCallbacks} provider="openrouter" model="openrouter/free" />);
+    render(<ControlPanel {...mockCallbacks} provider="huggingface" model="openai/gpt-oss-20b" />);
     const select = screen.getByLabelText('Model');
     expect(select).toBeInTheDocument();
-    expect(select.value).toBe('openrouter/free');
+    expect(select.value).toBe('openai/gpt-oss-20b');
   });
 
   test('calls onModelChange when model is changed', () => {
-    render(<ControlPanel {...mockCallbacks} provider="openrouter" model="openrouter/free" />);
+    render(<ControlPanel {...mockCallbacks} provider="huggingface" model="openai/gpt-oss-20b" />);
     const select = screen.getByLabelText('Model');
-    fireEvent.change(select, { target: { value: 'meta-llama/llama-3.1-8b-instruct:free' } });
-    expect(mockCallbacks.onModelChange).toHaveBeenCalledWith('meta-llama/llama-3.1-8b-instruct:free');
+    fireEvent.change(select, { target: { value: 'mistralai/Mistral-7B-Instruct-v0.2' } });
+    expect(mockCallbacks.onModelChange).toHaveBeenCalledWith('mistralai/Mistral-7B-Instruct-v0.2');
   });
 
   test('renders enrichment toggle', () => {
-    render(<ControlPanel {...mockCallbacks} enrichmentEnabled={true} />);
-    const checkbox = screen.getByRole('checkbox', { name: /Enable Data Enrichment/i });
+    render(<ControlPanel {...mockCallbacks} monolithicEnrichmentEnabled={true} />);
+    const checkbox = screen.getByRole('checkbox', { name: /Use Enriched Context/i });
     expect(checkbox).toBeInTheDocument();
     expect(checkbox).toBeChecked();
   });
 
-  test('calls onEnrichmentToggle when enrichment is toggled', () => {
-    render(<ControlPanel {...mockCallbacks} enrichmentEnabled={true} />);
-    const checkbox = screen.getByRole('checkbox', { name: /Enable Data Enrichment/i });
+  test('calls onMonolithicEnrichmentToggle when enrichment is toggled', () => {
+    render(<ControlPanel {...mockCallbacks} monolithicEnrichmentEnabled={true} />);
+    const checkbox = screen.getByRole('checkbox', { name: /Use Enriched Context/i });
     fireEvent.click(checkbox);
-    expect(mockCallbacks.onEnrichmentToggle).toHaveBeenCalledWith(false);
+    expect(mockCallbacks.onMonolithicEnrichmentToggle).toHaveBeenCalledWith(false);
   });
 
-  test('renders architecture mode selector', () => {
+  test.skip('renders architecture mode selector', () => {
+    // Architecture selector is currently commented out in ControlPanel.js
     render(<ControlPanel {...mockCallbacks} architecture="chunked" />);
     const select = screen.getByLabelText('Architecture Mode');
     expect(select).toBeInTheDocument();
     expect(select.value).toBe('chunked');
   });
 
-  test('calls onArchitectureChange when architecture is changed', () => {
+  test.skip('calls onArchitectureChange when architecture is changed', () => {
+    // Architecture selector is currently commented out in ControlPanel.js
     render(<ControlPanel {...mockCallbacks} architecture="chunked" />);
     const select = screen.getByLabelText('Architecture Mode');
     fireEvent.change(select, { target: { value: 'monolithic' } });
@@ -101,14 +106,14 @@ describe('ControlPanel', () => {
     
     const providerSelect = screen.getByLabelText('API Provider');
     const modelSelect = screen.getByLabelText('Model');
-    const enrichmentCheckbox = screen.getByRole('checkbox', { name: /Enable Data Enrichment/i });
-    const architectureSelect = screen.getByLabelText('Architecture Mode');
+    const enrichmentCheckbox = screen.getByRole('checkbox', { name: /Use Enriched Context/i });
+    // const architectureSelect = screen.getByLabelText('Architecture Mode'); // Commented out in component
     const generateButton = screen.getByRole('button', { name: /Generating.../i });
 
     expect(providerSelect).toBeDisabled();
     expect(modelSelect).toBeDisabled();
     expect(enrichmentCheckbox).toBeDisabled();
-    expect(architectureSelect).toBeDisabled();
+    // expect(architectureSelect).toBeDisabled();
     expect(generateButton).toBeDisabled();
   });
 
